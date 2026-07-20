@@ -20,6 +20,7 @@
     "url": "git+https://github.com/smounters/smounters-public.git",
     "directory": "packages/cron"
   },
+  "homepage": "https://smounters.github.io/smounters-public/guide/cron",
   "engines": {
     "node": ">=20.0.0"
   },

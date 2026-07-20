@@ -18,6 +18,7 @@
     "url": "git+https://github.com/smounters/smounters-public.git",
     "directory": "packages/events"
   },
+  "homepage": "https://smounters.github.io/smounters-public/guide/events",
   "engines": { "node": ">=20.0.0" },
   "scripts": {
     "build": "tsc -p tsconfig.json",
