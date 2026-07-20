@@ -1,0 +1,145 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: Publish
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect:
+    name: Resolve version from tag
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - name: Parse version
+        id: v
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+  # Гейт перед публикацией. Раньше его не было — из-за этого код в пакетах
+  # разошёлся с опубликованным, и никто не заметил: workflow собирал и публиковал,
+  # но не проверял. Публикация необратима, поэтому проверки идут ДО неё.
+  verify:
+    name: Typecheck + tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Test
+        run: pnpm run test
+
+  publish:
+    name: Publish ${{ matrix.package }}
+    needs: [detect, verify]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        package:
+          - "@smounters/core"
+          - "@smounters/cron"
+          - "@smounters/events"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Sync version
+        run: pnpm --filter "${{ matrix.package }}" exec pnpm version "${{ needs.detect.outputs.version }}" --no-git-tag-version --allow-same-version
+
+      - name: Build core (required by all packages)
+        run: pnpm --filter @smounters/core run build
+
+      - name: Build
+        run: pnpm --filter "${{ matrix.package }}" run build
+
+      - name: Publish to npm
+        run: pnpm --filter "${{ matrix.package }}" publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  docs:
+    name: Deploy docs to GitHub Pages
+    needs: [detect, publish]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build docs
+        env:
+          DOCS_BASE: /${{ github.event.repository.name }}/
+        run: pnpm run docs:build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: packages/core/docs/.vitepress/dist
+
+  release:
+    name: Create release
+    needs: [detect, publish]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true

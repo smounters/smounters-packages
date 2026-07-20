@@ -1,0 +1,52 @@
+{
+  "name": "@smounters/core",
+  "version": "2.0.1",
+  "description": "NestJS-like modular DI container with unified HTTP + Connect RPC server for TypeScript",
+  "keywords": ["di", "dependency-injection", "fastify", "connectrpc", "typescript"],
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./core": { "types": "./dist/core/index.d.ts", "import": "./dist/core/index.js" },
+    "./decorators": { "types": "./dist/decorators/index.d.ts", "import": "./dist/decorators/index.js" },
+    "./pipes": { "types": "./dist/pipes/index.d.ts", "import": "./dist/pipes/index.js" },
+    "./services": { "types": "./dist/services/index.d.ts", "import": "./dist/services/index.js" },
+    "./validation": { "types": "./dist/validation/index.d.ts", "import": "./dist/validation/index.js" },
+    "./ws": { "types": "./dist/ws/index.d.ts", "import": "./dist/ws/index.js" }
+  },
+  "files": ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
+  "publishConfig": { "access": "public" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smounters/smounters-public.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://smounters.github.io/smounters-public/",
+  "engines": { "node": ">=20.0.0" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "test": "vitest run",
+    "clean": "rm -rf dist",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "prepack": "pnpm run clean && pnpm run build",
+    "prepublishOnly": "pnpm run clean && pnpm run build"
+  },
+  "peerDependencies": {
+    "@connectrpc/connect": "^2.1.1",
+    "@connectrpc/connect-fastify": "^2.1.1",
+    "@fastify/cors": "^11.2.0",
+    "@fastify/websocket": "^11.0.0",
+    "fastify": "^5.7.4",
+    "reflect-metadata": "^0.2.2",
+    "tslog": "^4.10.2",
+    "tsyringe": "^4.10.0",
+    "typescript": "^5.9.3",
+    "zod": "^4.3.6"
+  },
+  "peerDependenciesMeta": {
+    "@fastify/websocket": { "optional": true }
+  }
+}

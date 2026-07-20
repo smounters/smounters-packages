@@ -1,0 +1,39 @@
+{
+  "name": "smounters-public",
+  "private": true,
+  "scripts": {
+    "build": "pnpm --filter @smounters/core run build && pnpm --filter !@smounters/core -r run build",
+    "typecheck": "pnpm --filter @smounters/core run build && pnpm -r run typecheck",
+    "lint": "pnpm -r run lint",
+    "lint:fix": "pnpm -r run lint:fix",
+    "test": "pnpm --filter @smounters/core run build && pnpm -r run test",
+    "clean": "pnpm -r run clean",
+    "docs:dev": "pnpm --filter @smounters/core docs:dev",
+    "docs:build": "pnpm --filter @smounters/core docs:build"
+  },
+  "devDependencies": {
+    "@connectrpc/connect": "^2.1.1",
+    "@connectrpc/connect-fastify": "^2.1.1",
+    "@eslint/js": "^10.0.1",
+    "@fastify/cors": "^11.2.0",
+    "@fastify/websocket": "^11.2.0",
+    "@swc/core": "^1.15.46",
+    "@types/node": "^25.5.0",
+    "@types/ws": "^8.18.1",
+    "eslint": "^10.1.0",
+    "eslint-config-prettier": "^10.1.8",
+    "fastify": "^5.8.4",
+    "prettier": "^3.8.1",
+    "reflect-metadata": "^0.2.2",
+    "tslog": "^4.10.2",
+    "tsyringe": "^4.10.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.2",
+    "unplugin-swc": "^1.5.9",
+    "vite": "^6.3.5",
+    "vitepress": "^1.6.4",
+    "vitest": "^3.2.4",
+    "ws": "^8.20.0",
+    "zod": "^4.3.6"
+  }
+}
