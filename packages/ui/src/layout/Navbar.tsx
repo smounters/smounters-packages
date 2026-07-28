@@ -1,5 +1,6 @@
 import { Dropdown } from "@heroui/react";
 import type { Key, ReactNode } from "react";
+import { type LanguageOption, LanguageSwitcher } from "../components/LanguageSwitcher";
 import { ThemeSwitcher } from "../components/ThemeSwitcher";
 import { ICONS, Icon } from "../icons";
 import { useUiLabels } from "../provider";
@@ -10,16 +11,31 @@ export interface NavbarProps {
   collapsed: boolean;
   /** Что показать в меню аккаунта; без него меню не рисуется. */
   userEmail?: string | undefined;
+  /** Метка рядом с почтой в меню аккаунта (роль, тариф). */
   userBadge?: ReactNode | undefined;
   onSignOut?: (() => void) | undefined;
   /** Место под специфику приложения (например, статус бота). */
   actions?: ReactNode | undefined;
+  /** Переключатель языка рядом с темой. Без списка языков не рисуется. */
+  locales?: LanguageOption[] | undefined;
+  locale?: string | undefined;
+  onLocaleChange?: ((locale: string) => void) | undefined;
 }
 
 const ICON_BTN =
   "inline-flex size-9 items-center justify-center rounded-full border border-border bg-surface text-foreground transition-colors hover:bg-surface-secondary outline-none focus-visible:ring-2 focus-visible:ring-focus";
 
-export function Navbar({ onToggleSidebar, collapsed, userEmail, userBadge, onSignOut, actions }: NavbarProps) {
+export function Navbar({
+  onToggleSidebar,
+  collapsed,
+  userEmail,
+  userBadge,
+  onSignOut,
+  actions,
+  locales,
+  locale,
+  onLocaleChange,
+}: NavbarProps) {
   const labels = useUiLabels();
   const { pageTitle } = usePageTitleContext();
 
@@ -42,7 +58,9 @@ export function Navbar({ onToggleSidebar, collapsed, userEmail, userBadge, onSig
 
       <div className="flex items-center gap-2">
         {actions}
-        {userBadge}
+        {locales && locales.length > 0 && locale && onLocaleChange && (
+          <LanguageSwitcher locales={locales} locale={locale} onLocaleChange={onLocaleChange} />
+        )}
         <ThemeSwitcher />
 
         {userEmail && (
@@ -53,7 +71,10 @@ export function Navbar({ onToggleSidebar, collapsed, userEmail, userBadge, onSig
             <Dropdown.Popover placement="bottom end">
               <Dropdown.Menu aria-label={labels.layout.userMenu} onAction={onUserAction}>
                 <Dropdown.Item id="email" isDisabled textValue={userEmail}>
-                  <span className="truncate text-sm text-muted">{userEmail}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="truncate text-sm text-muted">{userEmail}</span>
+                    {userBadge}
+                  </span>
                 </Dropdown.Item>
                 <Dropdown.Item id="signOut" textValue={labels.actions.signOut}>
                   <span className="flex items-center gap-2">

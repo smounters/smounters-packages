@@ -3,6 +3,7 @@ import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react
 import { Outlet, useLocation } from "react-router-dom";
 import { useResizable } from "../hooks/useResizable";
 import { useUiLabels, useUiSetting } from "../provider";
+import type { LanguageOption } from "../components/LanguageSwitcher";
 import { getPageTitle } from "./get-page-title";
 import { Navbar } from "./Navbar";
 import { PageTitleProvider } from "./PageTitleContext";
@@ -30,12 +31,16 @@ export interface AppLayoutProps {
   logo?: ReactNode | undefined;
   /** Заголовок, когда роут не совпал ни с одним пунктом меню. */
   defaultTitle?: string | undefined;
-  /** Прибитый к низу сайдбара блок (переключатель языка). */
+  /** Прибитый к низу сайдбара блок (переключатель приложений, версия). */
   sidebarFooter?: ReactNode | undefined;
   headerActions?: ReactNode | undefined;
   userEmail?: string | undefined;
   userBadge?: ReactNode | undefined;
   onSignOut?: (() => void) | undefined;
+  /** Выбор языка в топбаре, рядом с темой. */
+  locales?: LanguageOption[] | undefined;
+  locale?: string | undefined;
+  onLocaleChange?: ((locale: string) => void) | undefined;
   /** Полоса над контентом на всю ширину (например, баннер просмотра от имени клиента). */
   banner?: ReactNode | undefined;
 }
@@ -66,6 +71,9 @@ export function AppLayout({
   userEmail,
   userBadge,
   onSignOut,
+  locales,
+  locale,
+  onLocaleChange,
   banner,
 }: AppLayoutProps) {
   const location = useLocation();
@@ -172,6 +180,9 @@ export function AppLayout({
             {...(userEmail !== undefined ? { userEmail } : {})}
             {...(userBadge !== undefined ? { userBadge } : {})}
             {...(onSignOut !== undefined ? { onSignOut } : {})}
+            {...(locales !== undefined ? { locales } : {})}
+            {...(locale !== undefined ? { locale } : {})}
+            {...(onLocaleChange !== undefined ? { onLocaleChange } : {})}
           />
           {banner}
           <main className="min-h-0 flex-1 overflow-y-auto bg-background p-4">
