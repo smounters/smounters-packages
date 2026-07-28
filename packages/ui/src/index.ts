@@ -13,6 +13,7 @@ export {
   type PaginatorProps,
   TABLE_COLUMNS_SECTION,
 } from "./components/DataTable";
+export { EnumSelect, type EnumOption, type EnumSelectProps } from "./components/EnumSelect";
 export { Field, FormDrawer, type FormDrawerProps, SELECT_CLASS } from "./components/FormDrawer";
 export { type LanguageOption, LanguageSwitcher, type LanguageSwitcherProps } from "./components/LanguageSwitcher";
 export { StatCard, type StatCardProps } from "./components/StatCard";
