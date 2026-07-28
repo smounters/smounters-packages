@@ -2,7 +2,14 @@
   "name": "@smounters/ui",
   "version": "2.0.1",
   "description": "HeroUI-based design layer: app shell with a resizable sidebar, a data table with per-user column settings, form drawer",
-  "keywords": ["react", "heroui", "design-system", "data-table", "app-shell", "typescript"],
+  "keywords": [
+    "react",
+    "heroui",
+    "design-system",
+    "data-table",
+    "app-shell",
+    "typescript"
+  ],
   "license": "MIT",
   "type": "module",
   "exports": {
@@ -10,9 +17,17 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./styles.css": "./dist/styles.css"
+    "./styles.css": "./dist/styles.css",
+    "./styles-unthemed.css": "./dist/styles-unthemed.css",
+    "./theme/palette.css": "./dist/theme/palette.css",
+    "./theme/base.css": "./dist/theme/base.css"
   },
-  "files": ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "publishConfig": {
     "access": "public"
   },
@@ -26,7 +41,7 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && cp src/styles.css dist/styles.css && cp -r src/theme dist/theme",
+    "build": "tsc -p tsconfig.json && mkdir -p dist/theme && cp src/styles.css src/styles-unthemed.css dist/ && cp src/theme/*.css dist/theme/",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
