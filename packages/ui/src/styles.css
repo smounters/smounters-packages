@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@import "@heroui/styles/css";
+@import "./theme/palette.css";
+@import "./theme/base.css";
+@source "./**/*.js";
+/* @source обязателен: приложение тянет пакет из node_modules, а такие пути Tailwind v4 по умолчанию не
+   сканирует — без него утилиты, встречающиеся ТОЛЬКО внутри пакета, не попадут в сборку. Путь указывает
+   на СОБРАННЫЙ js рядом (файл копируется в dist/), имена классов после tsc остаются строками.
+   brand-theme.css идёт ПОСЛЕ @heroui/styles, чтобы палитра перебивала дефолтную. */
+
+@theme {
+  --radius-small: 0.375rem;
+  --radius-medium: 0.5rem;
+  --radius-large: 0.75rem;
+}

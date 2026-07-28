@@ -1,0 +1,73 @@
+/* Структурные правки поверх @heroui/styles: рамки полей, единый масштаб радиусов, focus-ring,
+   стрелка нативного <select>. Цвета — рядом, в palette.css. */
+
+/* HeroUI отдаёт поля без рамки (`--field-border: transparent`). Возвращаем инпутам ту же границу,
+   что у карточек, — иначе форма выглядит набором плавающих пятен. */
+:root,
+[data-theme="light"],
+[data-theme="dark"] {
+  --field-border: var(--border);
+  --field-border-width: 1px;
+  --border-width-field: 1px;
+}
+
+/* Кнопки только с иконкой — круглые (кроме сегментов ButtonGroup: там крайние скругляет сам HeroUI). */
+.button--icon-only:not(.button-group *) {
+  border-radius: 9999px;
+}
+
+/* Единый масштаб радиусов: контролы 8px, плавающие поверхности 12px. У HeroUI множители ×1.5/×2/×3
+   от базового 0.5rem разводят инпуты (12px) и кнопки/карточки (24px) — визуально это разные языки. */
+:root,
+[data-theme="light"],
+[data-theme="dark"] {
+  --radius-3xl: var(--radius-large);
+}
+
+.button:not(.button--icon-only):not(.button-group *),
+.input,
+.input-group,
+.select__trigger,
+.textarea,
+.chip,
+.tag,
+.badge,
+.menu-item {
+  border-radius: var(--radius-medium);
+}
+
+/* Видимый focus-ring на всём, что фокусируется с клавиатуры. */
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* У компонентов HeroUI свой ring — наш outline снимаем, чтобы не задваивать. */
+.button:focus-visible,
+.input:focus-visible,
+.input-group:focus-within,
+.select__trigger:focus-visible,
+.textarea:focus-visible,
+.checkbox:focus-visible,
+.switch:focus-visible,
+.radio:focus-visible,
+.tabs__tab:focus-visible {
+  outline: none;
+}
+
+/* Нативный <select> (SELECT_CLASS): браузерная стрелка прижата к краю и игнорирует padding —
+   рисуем свою с тем же отступом 0.75rem, что и текст слева. */
+.app-select {
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='16'%20height='16'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23888888'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpolyline%20points='6%209%2012%2015%2018%209'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+}
