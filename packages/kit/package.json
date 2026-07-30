@@ -1,0 +1,66 @@
+{
+  "name": "@smounters/kit",
+  "version": "2.1.0",
+  "description": "Batteries for Imperium services: structured logging, Redis module with a distributed lock, SSRF-safe fetch, decimal money, request context, env schemas",
+  "keywords": ["imperium", "fastify", "redis", "ssrf", "decimal", "logging", "typescript"],
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./log": { "types": "./dist/log/index.d.ts", "import": "./dist/log/index.js" },
+    "./redis": { "types": "./dist/redis/index.d.ts", "import": "./dist/redis/index.js" },
+    "./http": { "types": "./dist/http/index.d.ts", "import": "./dist/http/index.js" },
+    "./net": { "types": "./dist/net/index.d.ts", "import": "./dist/net/index.js" },
+    "./config": { "types": "./dist/config/index.d.ts", "import": "./dist/config/index.js" },
+    "./money": { "types": "./dist/money/index.d.ts", "import": "./dist/money/index.js" },
+    "./rpc": { "types": "./dist/rpc/index.d.ts", "import": "./dist/rpc/index.js" },
+    "./util": { "types": "./dist/util/index.d.ts", "import": "./dist/util/index.js" }
+  },
+  "files": ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
+  "publishConfig": { "access": "public" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smounters/smounters-packages.git",
+    "directory": "packages/kit"
+  },
+  "homepage": "https://github.com/smounters/smounters-packages/tree/main/packages/kit#readme",
+  "engines": { "node": ">=20.0.0" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "test": "vitest run",
+    "clean": "rm -rf dist",
+    "prepack": "pnpm run clean && pnpm run build",
+    "prepublishOnly": "pnpm run clean && pnpm run build"
+  },
+  "dependencies": {
+    "decimal.js": "^10.6.0"
+  },
+  "peerDependencies": {
+    "@bufbuild/protobuf": "^2",
+    "@bufbuild/protovalidate": "^1",
+    "@connectrpc/connect": "^2",
+    "@smounters/core": "^2.1.0",
+    "fastify": "^5",
+    "ioredis": "^5",
+    "zod": "^4"
+  },
+  "peerDependenciesMeta": {
+    "@bufbuild/protobuf": { "optional": true },
+    "@bufbuild/protovalidate": { "optional": true },
+    "@connectrpc/connect": { "optional": true },
+    "fastify": { "optional": true },
+    "ioredis": { "optional": true },
+    "zod": { "optional": true }
+  },
+  "devDependencies": {
+    "@bufbuild/protobuf": "^2.10.2",
+    "@bufbuild/protovalidate": "^1.0.0",
+    "@connectrpc/connect": "^2.1.1",
+    "@smounters/core": "workspace:*",
+    "fastify": "^5.8.4",
+    "ioredis": "^5.9.3",
+    "zod": "^4.3.6"
+  }
+}
