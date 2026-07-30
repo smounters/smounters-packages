@@ -127,6 +127,15 @@ importers:
         specifier: workspace:*
         version: link:../core
 
+  packages/data:
+    devDependencies:
+      '@mikro-orm/core':
+        specifier: ^7
+        version: 7.1.8
+      '@mikro-orm/decorators':
+        specifier: ^7
+        version: 7.1.8(@mikro-orm/core@7.1.8)(reflect-metadata@0.2.2)
+
   packages/events:
     dependencies:
       reflect-metadata:
@@ -832,6 +841,25 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@mikro-orm/core@7.1.8':
+    resolution: {integrity: sha512-hX/869Heo+EEzLEnJsL/c17T4N0qJEn9E6ZQv58nRaV2yIKZGa9FJFnqRXgo5H8wv1ktieQLXcfARs1pcXZofw==}
+    engines: {node: '>= 22.17.0'}
+    peerDependencies:
+      dataloader: 2.2.3
+    peerDependenciesMeta:
+      dataloader:
+        optional: true
+
+  '@mikro-orm/decorators@7.1.8':
+    resolution: {integrity: sha512-aZZ2F+TMlxo9U+bErZHcZCMxoxafnCY5ZpdXyXJAsAUMIYHYTAj44Q4WdElammRq+nRn3oyEmK3h7dSJAWMmDg==}
+    engines: {node: '>= 22.17.0'}
+    peerDependencies:
+      '@mikro-orm/core': 7.1.8
+      reflect-metadata: ^0.1.0 || ^0.2.0
+    peerDependenciesMeta:
+      reflect-metadata:
+        optional: true
 
   '@pinojs/redact@0.4.0':
     resolution: {integrity: sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg==}
@@ -3196,6 +3224,14 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@mikro-orm/core@7.1.8': {}
+
+  '@mikro-orm/decorators@7.1.8(@mikro-orm/core@7.1.8)(reflect-metadata@0.2.2)':
+    dependencies:
+      '@mikro-orm/core': 7.1.8
+    optionalDependencies:
+      reflect-metadata: 0.2.2
 
   '@pinojs/redact@0.4.0': {}
 

@@ -1,0 +1,38 @@
+{
+  "name": "@smounters/data",
+  "version": "2.0.1",
+  "description": "Reusable MikroORM entity fragments: UUIDv7 primary key, audit columns, per-user settings bag",
+  "keywords": ["mikro-orm", "entity", "postgres", "uuidv7", "typescript"],
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" }
+  },
+  "files": ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
+  "publishConfig": { "access": "public" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smounters/smounters-packages.git",
+    "directory": "packages/data"
+  },
+  "homepage": "https://smounters.github.io/smounters-packages/",
+  "engines": { "node": ">=20.0.0" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "test": "vitest run --passWithNoTests",
+    "clean": "rm -rf dist",
+    "prepack": "pnpm run clean && pnpm run build",
+    "prepublishOnly": "pnpm run clean && pnpm run build"
+  },
+  "peerDependencies": {
+    "@mikro-orm/core": "^7",
+    "@mikro-orm/decorators": "^7"
+  },
+  "devDependencies": {
+    "@mikro-orm/core": "^7",
+    "@mikro-orm/decorators": "^7"
+  }
+}
