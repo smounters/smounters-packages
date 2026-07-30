@@ -43,6 +43,9 @@ export interface UiLabels {
     loadErrorFallback: string;
     dragColumn: string;
     resizeColumn: string;
+    /** Подписи галочек выделения строк (`enableSelection`). */
+    selectAll: string;
+    selectRow: string;
     perPage: string;
     rowsPerPage: string;
     range: (r: { from: number; to: number; total: number }) => string;
@@ -72,6 +75,8 @@ export const DEFAULT_LABELS: UiLabels = {
     loadErrorFallback: "unknown error",
     dragColumn: "Drag to reorder",
     resizeColumn: "Drag to resize",
+    selectAll: "Select all rows on this page",
+    selectRow: "Select row",
     perPage: "Per page",
     rowsPerPage: "Rows per page",
     range: ({ from, to, total }) => `${from}–${to} of ${total}`,

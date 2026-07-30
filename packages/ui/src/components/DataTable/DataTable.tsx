@@ -18,12 +18,13 @@ import {
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
+  type RowSelectionState,
   type SortingState,
   type Updater,
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useUiLabels, useUiSetting } from "../../provider";
 import { ICONS, Icon } from "../../icons";
 import { ColumnsMenu } from "./ColumnsMenu";
@@ -51,6 +52,16 @@ export interface DataTableProps<TData> {
   columns: ColumnDef<TData, any>[];
   data: TData[];
   getRowId?: ((row: TData) => string) | undefined;
+  /**
+   * Выделение строк: рисует ведущую колонку с галочками и сообщает наружу id выбранных строк (по
+   * `getRowId`, поэтому **без него не работает**). Выделение живёт в пределах страницы: сбрасывается
+   * на новых данных (другая страница, фильтр, перезапрос), чтобы массовое действие никогда не
+   * применилось к строкам, которых пользователь больше не видит.
+   */
+  enableSelection?: boolean | undefined;
+  onSelectionChange?: ((ids: string[]) => void) | undefined;
+  /** Увеличить число, чтобы снять выделение снаружи (например кнопкой «сбросить»). */
+  selectionResetSignal?: number | undefined;
   isLoading?: boolean | undefined;
   /** Запрос упал — показываем строку ошибки, а не (вводящую в заблуждение) пустоту. */
   error?: unknown | undefined;
@@ -96,6 +107,9 @@ export function DataTable<TData>({
   columns,
   data,
   getRowId,
+  enableSelection,
+  onSelectionChange,
+  selectionResetSignal,
   isLoading,
   error,
   emptyText,
@@ -134,11 +148,16 @@ export function DataTable<TData>({
     setSizing(JSON.parse(sizesKey) as ColumnSizingState);
   }, [sizesKey]);
 
+  // Выделение — состояние страницы, а не пользователя: в настройки не пишется.
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
   const table = useReactTable<TData>({
     data,
     columns,
     ...(getRowId ? { getRowId } : {}),
-    state: { columnOrder, columnVisibility, sorting, columnSizing: sizing },
+    state: { columnOrder, columnVisibility, sorting, columnSizing: sizing, rowSelection },
+    enableRowSelection: !!enableSelection,
+    onRowSelectionChange: setRowSelection,
     columnResizeMode: "onChange",
     enableColumnResizing: true,
     onColumnOrderChange: (u) => save({ ...state, order: resolve(u, columnOrder) }),
@@ -162,6 +181,25 @@ export function DataTable<TData>({
     enableSortingRemoval: true,
     sortDescFirst: false,
   });
+
+  // Новые данные (страница/фильтр/перезапрос) или сигнал снаружи → выделение снимается: массовое
+  // действие не должно применяться к строкам, которых на экране уже нет.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: data и selectionResetSignal — триггеры сброса, в теле не читаются
+  useEffect(() => {
+    if (enableSelection) setRowSelection({});
+  }, [data, enableSelection, selectionResetSignal]);
+
+  // Сообщаем наружу id выбранных строк. onSelectionChange читаем через ref, чтобы зависеть только от
+  // самого выделения: незамемоизированная функция родителя иначе даёт цикл (новый массив id →
+  // setState у родителя → новая функция → эффект снова).
+  const onSelectionChangeRef = useRef(onSelectionChange);
+  onSelectionChangeRef.current = onSelectionChange;
+  const selectedKey = Object.keys(rowSelection)
+    .filter((k) => rowSelection[k])
+    .join(",");
+  useEffect(() => {
+    if (enableSelection) onSelectionChangeRef.current?.(selectedKey ? selectedKey.split(",") : []);
+  }, [enableSelection, selectedKey]);
 
   // Серверная сортировка: сообщаем текущую наружу — на монтировании (когда подтянулась сохранённая) и
   // на каждой смене.
@@ -191,7 +229,7 @@ export function DataTable<TData>({
     save({ ...state, order: next });
   };
 
-  const colCount = table.getVisibleLeafColumns().length + (hasActions ? 1 : 0);
+  const colCount = table.getVisibleLeafColumns().length + (hasActions ? 1 : 0) + (enableSelection ? 1 : 0);
 
   return (
     <div className="flex flex-col gap-4">
@@ -213,6 +251,21 @@ export function DataTable<TData>({
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-border border-b">
+                {/* Колонка выделения — вне SortableContext: её не перетаскивают и не прячут. */}
+                {enableSelection && (
+                  <th className={`${TH} w-10`}>
+                    <input
+                      type="checkbox"
+                      className="size-4 cursor-pointer accent-accent align-middle"
+                      aria-label={labels.table.selectAll}
+                      checked={table.getIsAllPageRowsSelected()}
+                      ref={(el) => {
+                        if (el) el.indeterminate = table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected();
+                      }}
+                      onChange={table.getToggleAllPageRowsSelectedHandler()}
+                    />
+                  </th>
+                )}
                 <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
                   {table.getHeaderGroups()[0]?.headers.map((h) => (
                     <DraggableHeader key={h.id} header={h} />
@@ -246,7 +299,7 @@ export function DataTable<TData>({
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className={`border-border border-b last:border-0 hover:bg-surface-secondary ${onRowClick ? "cursor-pointer" : ""}`}
+                    className={`border-border border-b last:border-0 hover:bg-surface-secondary ${onRowClick ? "cursor-pointer" : ""} ${row.getIsSelected() ? "bg-surface-secondary" : ""}`}
                     onClick={onRowClick ? () => onRowClick(row.original) : undefined}
                     role={onRowClick ? "button" : undefined}
                     tabIndex={onRowClick ? 0 : undefined}
@@ -261,6 +314,19 @@ export function DataTable<TData>({
                         : undefined
                     }
                   >
+                    {enableSelection && (
+                      // biome-ignore lint/a11y/useKeyWithClickEvents: гасит всплытие клика по строке, сама галочка — настоящий контрол
+                      <td className={`${TD} w-10`} onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          className="size-4 cursor-pointer accent-accent align-middle"
+                          aria-label={labels.table.selectRow}
+                          checked={row.getIsSelected()}
+                          disabled={!row.getCanSelect()}
+                          onChange={row.getToggleSelectedHandler()}
+                        />
+                      </td>
+                    )}
                     <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
                       {row.getVisibleCells().map((cell) => (
                         <DraggableCell key={cell.id} columnId={cell.column.id} {...(sizing[cell.column.id] ? { width: sizing[cell.column.id] } : {})}>

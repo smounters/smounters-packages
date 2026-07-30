@@ -36,7 +36,7 @@
     "url": "git+https://github.com/smounters/smounters-packages.git",
     "directory": "packages/ui"
   },
-  "homepage": "https://smounters.github.io/smounters-packages/guide/ui",
+  "homepage": "https://github.com/smounters/smounters-packages/tree/main/packages/ui#readme",
   "engines": {
     "node": ">=20.0.0"
   },

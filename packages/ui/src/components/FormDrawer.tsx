@@ -11,7 +11,12 @@ import {
 import { ICONS, Icon } from "../icons";
 
 // Ширина правой панели — одна на все формы, тянется за левый край.
-const DRAWER_WIDTH_KEY = "trading:drawerWidth";
+//
+// Ключ НЕЙТРАЛЬНЫЙ: до 2.1.0 здесь стоял `trading:drawerWidth` — префикс одного конкретного
+// приложения, случайно уехавший в общий пакет. Хранилище тут localStorage, а не настройки
+// пользователя: ширину надо знать в первом же кадре, иначе панель откроется дефолтной и дёрнется,
+// пока летит запрос.
+const DRAWER_WIDTH_KEY = "ui:drawerWidth";
 const DRAWER_MIN_WIDTH = 360;
 const DRAWER_DEFAULT_WIDTH = 448;
 

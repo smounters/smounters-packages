@@ -23,7 +23,7 @@ export function Paginator({
   total,
   onOffsetChange,
   onLimitChange,
-  pageSizes = [10, 25, 50, 100],
+  pageSizes = [10, 15, 25, 50, 100],
 }: PaginatorProps) {
   const { table } = useUiLabels();
   const pages = Math.max(1, Math.ceil(total / limit));
