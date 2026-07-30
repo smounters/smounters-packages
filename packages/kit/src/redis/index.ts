@@ -15,6 +15,14 @@ export interface RedisConnectionOptions {
   url: string;
   /** Passed through to ioredis; the defaults below are chosen for a request-serving process. */
   options?: RedisOptions;
+  /**
+   * Wait for the connection before the module finishes starting, and FAIL the startup if it errors.
+   *
+   * Two defensible stances, so it is a choice rather than a default: an API that also serves pages
+   * should come up and warn (a cache outage is not an outage of the product), while a worker whose whole
+   * job is queue-driven is better off refusing to start than pretending to work. Default is not to wait.
+   */
+  awaitReady?: boolean;
 }
 
 const DEFAULTS: RedisOptions = {
@@ -45,10 +53,16 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     private readonly logger: LoggerService,
   ) {}
 
-  onModuleInit(): void {
+  async onModuleInit(): Promise<void> {
     this.client = new Redis(this.connection.url, { ...DEFAULTS, ...this.connection.options });
     this.client.on("ready", () => this.logger.info({ type: "redis", event: "ready" }));
     this.client.on("error", (err: Error) => this.logger.warn({ type: "redis", event: "error", error: err.message }));
+    if (this.connection.awaitReady) {
+      await new Promise<void>((resolve, reject) => {
+        this.client.once("ready", resolve);
+        this.client.once("error", reject);
+      });
+    }
   }
 
   async onModuleDestroy(): Promise<void> {

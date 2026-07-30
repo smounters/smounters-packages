@@ -1,6 +1,10 @@
 import type { LogEntry, LogLevel, LogTransport } from "@smounters/core/core";
 import { currentRequestContext } from "../http/index.js";
 
+// Re-export the core log types: an application that declares the return type of its transports should
+// not need a second import from @smounters/core just for the name.
+export type { LogEntry, LogLevel, LogTransport };
+
 // Structured logging.
 //
 // Outside local development every entry is ONE single-line JSON object
