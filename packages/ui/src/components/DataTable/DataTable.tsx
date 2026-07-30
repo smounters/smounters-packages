@@ -202,6 +202,14 @@ export function DataTable<TData>({
     if (enableSelection) onSelectionChangeRef.current?.(selectedKey ? selectedKey.split(",") : []);
   }, [enableSelection, selectedKey]);
 
+  // Сброс ширины (двойной клик по ручке): убираем колонку из сохранённых ширин, иначе перезагрузка
+  // вернёт прежнее значение — состояние таблицы и настройка пользователя это разные вещи.
+  const resetWidth = (columnId: string) => {
+    const next = { ...(state.sizes ?? {}) };
+    delete next[columnId];
+    save({ ...state, order: columnOrder, sizes: next });
+  };
+
   // Серверная сортировка: сообщаем текущую наружу — на монтировании (когда подтянулась сохранённая) и
   // на каждой смене.
   const sortKey = sorting[0] ? `${sorting[0].id}:${sorting[0].desc ? "desc" : "asc"}` : "";
@@ -269,7 +277,13 @@ export function DataTable<TData>({
                 )}
                 <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
                   {table.getHeaderGroups()[0]?.headers.map((h) => (
-                    <DraggableHeader key={h.id} header={h} />
+                    // Ширину отдаём ТОЛЬКО у потянутых колонок: остальные раскладывает браузер.
+                    <DraggableHeader
+                      key={h.id}
+                      header={h}
+                      onResetWidth={resetWidth}
+                      {...(sizing[h.column.id] ? { width: sizing[h.column.id] } : {})}
+                    />
                   ))}
                 </SortableContext>
                 {hasActions && <th className={TH} />}

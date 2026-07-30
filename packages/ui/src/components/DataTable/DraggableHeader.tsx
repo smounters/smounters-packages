@@ -1,13 +1,31 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useUiLabels } from "../../provider";
 import { flexRender, type Header } from "@tanstack/react-table";
-import type { CSSProperties } from "react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
+import { useUiLabels } from "../../provider";
 
 const TH = "px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-muted";
 
-/** Заголовок колонки: ручка «⠿» тащит колонку (dnd-kit), клик по подписи переключает сортировку. */
-export function DraggableHeader<TData>({ header }: { header: Header<TData, unknown> }) {
+/**
+ * Заголовок колонки: ручка «⠿» тащит колонку (dnd-kit), клик по подписи переключает сортировку, правый
+ * край тянет ширину.
+ *
+ * `width` приходит СНАРУЖИ и только для колонок, которые пользователь ДЕЙСТВИТЕЛЬНО потянул. Брать
+ * `header.getSize()` нельзя: при включённом ресайзе TanStack отдаёт для неразмеченной колонки свои
+ * 150px, и таблица переставала растягиваться — семь колонок жались в 1050px, а остальная ширина экрана
+ * оставалась пустой. Без ширины раскладку делает браузер, как и до появления ресайза.
+ */
+export function DraggableHeader<TData>({
+  header,
+  width,
+  onResetWidth,
+}: {
+  header: Header<TData, unknown>;
+  width?: number | undefined;
+  /** Двойной клик по ручке: сбросить ширину. Нужен отдельно — `resetSize()` знает только про состояние
+   *  таблицы, а сохранённую настройку пользователя надо убрать, иначе перезагрузка её вернёт. */
+  onResetWidth?: ((columnId: string) => void) | undefined;
+}) {
   const { table } = useUiLabels();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: header.column.id,
@@ -19,7 +37,21 @@ export function DraggableHeader<TData>({ header }: { header: Header<TData, unkno
     opacity: isDragging ? 0.6 : 1,
     position: "relative",
     zIndex: isDragging ? 1 : 0,
-    width: header.getSize() === Number.MAX_SAFE_INTEGER ? undefined : header.getSize(),
+    width,
+  };
+
+  // Тянуть начинаем от ФАКТИЧЕСКОЙ ширины: у неразмеченной колонки TanStack считает её равной своим
+  // 150px, и первое движение мышью схлопывало бы широкую колонку до этого значения. Здесь мы сначала
+  // фиксируем то, что видно на экране, и только потом отдаём управление ресайзу.
+  const startResize = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    if (width === undefined) {
+      const th = (e.currentTarget as HTMLElement).closest("th");
+      const measured = th ? Math.round(th.getBoundingClientRect().width) : undefined;
+      if (measured) {
+        header.getContext().table.setColumnSizing((prev) => ({ ...prev, [header.column.id]: measured }));
+      }
+    }
+    header.getResizeHandler()(e);
   };
 
   return (
@@ -54,10 +86,18 @@ export function DraggableHeader<TData>({ header }: { header: Header<TData, unkno
           type="button"
           aria-label={table.resizeColumn}
           tabIndex={-1}
-          onDoubleClick={() => header.column.resetSize()}
-          onPointerDown={header.getResizeHandler()}
+          onDoubleClick={() => {
+            header.column.resetSize();
+            onResetWidth?.(header.column.id);
+          }}
+          onPointerDown={startResize}
           onTouchStart={header.getResizeHandler()}
-          className="group absolute inset-y-0 right-0 z-10 flex w-2 translate-x-1/2 cursor-col-resize touch-none items-stretch justify-center bg-transparent p-0"
+          // Зона захвата ЦЕЛИКОМ внутри своего заголовка (без translate), а линия прижата к правому
+          // краю — она и есть граница колонок. С вынесенной наружу половиной та часть перекрывалась
+          // СОСЕДНИМ заголовком: каждый `th` позиционирован, то есть образует свой контекст наложения,
+          // и `z-10` внутри него не перебивает следующий по документу элемент. Схватить можно было
+          // только внутренние 4px из 8.
+          className="group absolute inset-y-0 right-0 z-10 flex w-2 cursor-col-resize touch-none items-stretch justify-end bg-transparent p-0"
         >
           <span
             className={`h-full w-px transition-colors ${
