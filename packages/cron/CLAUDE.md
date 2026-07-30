@@ -1,6 +1,6 @@
 # @smounters/cron
 
-Cron scheduling package. Part of the [smounters-public monorepo](../../CLAUDE.md).
+Cron scheduling package. Part of the [smounters-packages monorepo](../../CLAUDE.md).
 
 ## What this package is
 

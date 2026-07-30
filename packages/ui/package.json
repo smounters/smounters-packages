@@ -33,10 +33,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/smounters/smounters-public.git",
+    "url": "git+https://github.com/smounters/smounters-packages.git",
     "directory": "packages/ui"
   },
-  "homepage": "https://smounters.github.io/smounters-public/guide/ui",
+  "homepage": "https://smounters.github.io/smounters-packages/guide/ui",
   "engines": {
     "node": ">=20.0.0"
   },

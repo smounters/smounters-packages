@@ -42,7 +42,7 @@ await new Application(AppModule).start({ port: 3000 });
 
 ## Documentation
 
-Full guide and API reference: **[smounters.github.io/smounters-public](https://smounters.github.io/smounters-public/)**
+Full guide and API reference: **[smounters.github.io/smounters-packages](https://smounters.github.io/smounters-packages/)**
 
 ## Development
 

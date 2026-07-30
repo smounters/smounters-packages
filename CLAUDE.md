@@ -1,10 +1,16 @@
-# smounters-public
+# smounters-packages
 
-pnpm workspaces monorepo для **публичных** пакетов `@smounters/*`, публикуемых на npmjs.
+pnpm workspaces monorepo для пакетов `@smounters/*`, публикуемых на npmjs.
 
-> **Разделение скоупов (2026-07-20).** `@smounters/*` — публичный скоуп, только эти три пакета.
+> **Разделение скоупов (2026-07-20).** `@smounters/*` — публичный скоуп, живёт здесь.
 > Приватный код платформы живёт в `smounters/smounters-apps` под скоупом `@smounters-org/*`.
 > Раньше всё было в одном скоупе `@smounters`, что и создавало конфликт.
+>
+> **Приватный реестр не нужен (решено 2026-07-29).** Всё, что выносится сюда, публикуемо без риска:
+> ни секретов, ни внутренних адресов, ни бизнес-правил — а код фронта и так отдаётся в браузер.
+> То, что надо прятать (план счетов, биллинг, матрица ролей, экономика крипто-сборов), решено
+> **не выносить вообще** — оно остаётся в приватном монорепо приложений. Полный разбор и план —
+> `smounters-apps/docs/internals/shared-packages.md`.
 
 ## Структура
 
@@ -12,8 +18,12 @@ pnpm workspaces monorepo для **публичных** пакетов `@smounter
 packages/
 ├── core/     — @smounters/core   (ядро фреймворка Imperium)
 ├── cron/     — @smounters/cron   (планировщик, декоратор @Cron)
-└── events/   — @smounters/events (типизированный event-emitter, @OnEvent)
+├── events/   — @smounters/events (типизированный event-emitter, @OnEvent)
+└── ui/       — @smounters/ui     (дизайн-слой на HeroUI v3: каркас, таблица, формы, темы)
 ```
+
+Запланированы (план — в `shared-packages.md`): `kit` (батарейки к core: журнал, Redis, RPC, деньги),
+`data` (абстрактные фрагменты MikroORM + настройки пользователя), `auth` (сессии на портах).
 
 ## История переездов
 
@@ -25,6 +35,7 @@ packages/
 | `@smounters/imperium-cron` | `@smounters/cron` | 2.0.0, 2026-06-11 |
 | `@smounters/imperium-events` | `@smounters/events` | 2.0.0, 2026-06-11 |
 | репо `smounters/imperium` | репо `smounters/smounters-public` | 2026-07-20 |
+| репо `smounters/smounters-public` | репо `smounters/smounters-packages` | 2026-07-29 |
 
 Старые пакеты `@smounters/imperium*` остаются на npm и подлежат деприкейту.
 
@@ -47,14 +58,14 @@ pnpm run docs:build      # сборка доков
 
 ## Публикация
 
-Все три пакета публикуются **вместе, одним тегом** и делят версию:
+Все пакеты публикуются **вместе, одним тегом** и делят версию:
 
 ```bash
 git tag v2.0.1 && git push origin v2.0.1
 ```
 
 CI (`.github/workflows/publish.yml`): резолв версии из тега → **typecheck + тесты** →
-сборка → `pnpm publish --access public` по матрице из трёх пакетов → доки на GitHub Pages →
+сборка → `pnpm publish --access public` по матрице пакетов → доки на GitHub Pages →
 GitHub Release. Нужен секрет `NPM_TOKEN` на репозитории.
 
 > Гейт с тестами добавлен намеренно. Раньше workflow собирал и публиковал, но ничего не

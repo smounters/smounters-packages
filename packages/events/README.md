@@ -2,7 +2,7 @@
 
 Typed in-process event emitter for [`@smounters/core`](https://www.npmjs.com/package/@smounters/core). Decorate methods with `@OnEvent()` and emit from any service. Supports wildcard patterns.
 
-Part of the [smounters-public monorepo](https://github.com/smounters/smounters-public).
+Part of the [smounters-packages monorepo](https://github.com/smounters/smounters-packages).
 
 ## Install
 
@@ -74,7 +74,7 @@ Injectable service:
 
 ## Documentation
 
-Full guide: **[smounters.github.io/smounters-public/guide/events](https://smounters.github.io/smounters-public/guide/events)**
+Full guide: **[smounters.github.io/smounters-packages/guide/events](https://smounters.github.io/smounters-packages/guide/events)**
 
 ## License
 

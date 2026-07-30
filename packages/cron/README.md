@@ -2,7 +2,7 @@
 
 Cron scheduling for [`@smounters/core`](https://www.npmjs.com/package/@smounters/core). Decorate methods with `@Cron()` and they run on a schedule. Jobs auto-stop on application shutdown.
 
-Part of the [smounters-public monorepo](https://github.com/smounters/smounters-public).
+Part of the [smounters-packages monorepo](https://github.com/smounters/smounters-packages).
 
 Built on [croner](https://github.com/Hexagon/croner) — lightweight, zero-dependency cron scheduler.
 
@@ -59,7 +59,7 @@ Injectable service for introspection:
 
 ## Documentation
 
-Full guide: **[smounters.github.io/smounters-public/guide/cron](https://smounters.github.io/smounters-public/guide/cron)**
+Full guide: **[smounters.github.io/smounters-packages/guide/cron](https://smounters.github.io/smounters-packages/guide/cron)**
 
 ## License
 

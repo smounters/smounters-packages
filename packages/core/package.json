@@ -17,10 +17,10 @@
   "publishConfig": { "access": "public" },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/smounters/smounters-public.git",
+    "url": "git+https://github.com/smounters/smounters-packages.git",
     "directory": "packages/core"
   },
-  "homepage": "https://smounters.github.io/smounters-public/",
+  "homepage": "https://smounters.github.io/smounters-packages/",
   "engines": { "node": ">=20.0.0" },
   "scripts": {
     "build": "tsc -p tsconfig.json",

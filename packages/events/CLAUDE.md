@@ -1,6 +1,6 @@
 # @smounters/events
 
-Typed event emitter package. Part of the [smounters-public monorepo](../../CLAUDE.md).
+Typed event emitter package. Part of the [smounters-packages monorepo](../../CLAUDE.md).
 
 ## What this package is
 

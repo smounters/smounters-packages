@@ -60,4 +60,4 @@ Validation subpath also exports the built-in app config schema:
 | `@smounters/core` | Core framework (this package) |
 | [`@smounters/cron`](https://www.npmjs.com/package/@smounters/cron) | Cron scheduling with `@Cron()` decorator |
 
-All packages are in a single [monorepo](https://github.com/smounters/smounters-public).
+All packages are in a single [monorepo](https://github.com/smounters/smounters-packages).

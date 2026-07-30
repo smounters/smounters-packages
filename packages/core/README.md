@@ -2,7 +2,7 @@
 
 NestJS-inspired modular DI framework for TypeScript services. Unified HTTP + ConnectRPC + WebSocket server on a single Fastify instance.
 
-Part of the [smounters-public monorepo](https://github.com/smounters/smounters-public). See also: [`@smounters/cron`](https://www.npmjs.com/package/@smounters/cron).
+Part of the [smounters-packages monorepo](https://github.com/smounters/smounters-packages). See also: [`@smounters/cron`](https://www.npmjs.com/package/@smounters/cron).
 
 ## Features
 
@@ -102,7 +102,7 @@ import { registerWsGateways } from "@smounters/core/ws";
 
 ## Documentation
 
-Full guide and API reference: **[smounters.github.io/smounters-public](https://smounters.github.io/smounters-public/)**
+Full guide and API reference: **[smounters.github.io/smounters-packages](https://smounters.github.io/smounters-packages/)**
 
 ## License
 

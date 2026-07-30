@@ -1,6 +1,6 @@
 # @smounters/core
 
-Core framework package. Part of the [smounters-public monorepo](../../CLAUDE.md).
+Core framework package. Part of the [smounters-packages monorepo](../../CLAUDE.md).
 
 ## What this package is
 

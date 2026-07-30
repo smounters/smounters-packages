@@ -1,5 +1,5 @@
 {
-  "name": "smounters-public",
+  "name": "smounters-packages",
   "private": true,
   "scripts": {
     "build": "pnpm --filter @smounters/core run build && pnpm --filter !@smounters/core -r run build",

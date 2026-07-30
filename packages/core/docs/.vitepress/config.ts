@@ -43,7 +43,7 @@ export default defineConfig({
         },
       ],
     },
-    socialLinks: [{ icon: "github", link: "https://github.com/smounters/smounters-public" }],
+    socialLinks: [{ icon: "github", link: "https://github.com/smounters/smounters-packages" }],
     footer: {
       message: "Inspired by NestJS. Built for internal and public TypeScript backends.",
       copyright: "MIT License",
