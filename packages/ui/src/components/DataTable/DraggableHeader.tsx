@@ -46,7 +46,10 @@ export function DraggableHeader<TData>({ header }: { header: Header<TData, unkno
         )}
       </div>
       {header.column.getCanResize() && (
-        // Ручка ширины: тянется мышью, ширина колонки уезжает в настройки пользователя.
+        // Ручка ширины: тянется мышью, двойной клик возвращает исходную, ширина уезжает в настройки.
+        // Оформление такое же, как у ручек сайдбара и правой панели: широкая невидимая зона захвата, а
+        // видна ЛИНИЯ в один пиксель, подсвечивающаяся акцентом. Подсвечивать всю полосу нельзя — на
+        // фоне тонких границ таблицы это выглядит грубо.
         <button
           type="button"
           aria-label={table.resizeColumn}
@@ -54,8 +57,14 @@ export function DraggableHeader<TData>({ header }: { header: Header<TData, unkno
           onDoubleClick={() => header.column.resetSize()}
           onPointerDown={header.getResizeHandler()}
           onTouchStart={header.getResizeHandler()}
-          className="absolute inset-y-0 right-0 z-10 w-1.5 cursor-col-resize touch-none bg-transparent hover:bg-accent/60"
-        />
+          className="group absolute inset-y-0 right-0 z-10 flex w-2 translate-x-1/2 cursor-col-resize touch-none items-stretch justify-center bg-transparent p-0"
+        >
+          <span
+            className={`h-full w-px transition-colors ${
+              header.column.getIsResizing() ? "bg-accent" : "bg-transparent group-hover:bg-accent"
+            }`}
+          />
+        </button>
       )}
     </th>
   );

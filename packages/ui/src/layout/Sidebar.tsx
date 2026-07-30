@@ -109,7 +109,7 @@ function ParentGroup({ item, compact, onNavigate }: { item: SidebarItem; compact
 export function Sidebar({ items, compact = false, appName, logo, onNavigate, footer }: SidebarProps) {
   return (
     <nav className="flex h-full flex-col gap-1">
-      {(logo || appName) && (
+      {(Boolean(logo) || Boolean(appName)) && (
         <div className={cn("mb-4 flex items-center gap-2 px-3 py-1 text-foreground", compact && "justify-center px-0")}>
           {logo}
           {!compact && appName && <span className="truncate text-lg font-semibold">{appName}</span>}

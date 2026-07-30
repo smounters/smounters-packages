@@ -34,6 +34,7 @@ export {
   DEFAULT_LABELS,
   inMemorySettings,
   type PartialLabels,
+  type ThemeChangeHandler,
   type UiLabels,
   UiProvider,
   type UiProviderProps,
@@ -41,4 +42,5 @@ export {
   type UseSettingHook,
   useUiLabels,
   useUiSetting,
+  useUiThemeChange,
 } from "./provider";

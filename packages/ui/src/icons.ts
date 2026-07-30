@@ -6,7 +6,7 @@
 import { addCollection } from "@iconify/react";
 import { solarIcons } from "./solar-icons";
 
-addCollection(solarIcons as Parameters<typeof addCollection>[0]);
+addCollection(solarIcons);
 
 export { Icon } from "@iconify/react";
 

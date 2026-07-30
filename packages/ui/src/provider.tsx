@@ -22,7 +22,7 @@ export type UseSettingHook = <T>(section: string, key: string, fallback: T) => U
 export const inMemorySettings: UseSettingHook = <T,>(_section: string, _key: string, fallback: T): UiSetting<T> => ({
   value: fallback,
   isLoaded: true,
-  setValue: () => {},
+  setValue: () => undefined,
 });
 
 export interface UiLabels {
@@ -100,9 +100,18 @@ export type PartialLabels = {
   [K in keyof UiLabels]?: Partial<UiLabels[K]>;
 };
 
+/**
+ * Что сделать после смены темы. HeroUI хранит выбор per-origin, поэтому продукт, разложенный по
+ * поддоменам, пишет здесь свою куку на общий домен — и тема переносится между приложениями. Живёт в
+ * провайдере, а не в пропсе: переключатель темы рисует ещё и `Navbar` внутри каркаса, куда приложение
+ * пропс не передаёт.
+ */
+export type ThemeChangeHandler = (mode: string) => void;
+
 interface UiContextValue {
   labels: UiLabels;
   useSetting: UseSettingHook;
+  onThemeChange?: ThemeChangeHandler | undefined;
 }
 
 const UiContext = createContext<UiContextValue | null>(null);
@@ -112,9 +121,11 @@ export interface UiProviderProps {
   labels?: PartialLabels;
   /** Без него настройки живут только в памяти вкладки и не переживают перезагрузку. */
   useSetting?: UseSettingHook;
+  /** Вызывается после каждой смены темы — сюда приложение вешает своё хранение (например куку). */
+  onThemeChange?: ThemeChangeHandler | undefined;
 }
 
-export function UiProvider({ children, labels, useSetting = inMemorySettings }: UiProviderProps) {
+export function UiProvider({ children, labels, useSetting = inMemorySettings, onThemeChange }: UiProviderProps) {
   const value = useMemo<UiContextValue>(
     () => ({
       labels: {
@@ -125,8 +136,9 @@ export function UiProvider({ children, labels, useSetting = inMemorySettings }: 
         language: { ...DEFAULT_LABELS.language, ...labels?.language },
       },
       useSetting,
+      onThemeChange,
     }),
-    [labels, useSetting],
+    [labels, useSetting, onThemeChange],
   );
   return <UiContext.Provider value={value}>{children}</UiContext.Provider>;
 }
@@ -134,6 +146,11 @@ export function UiProvider({ children, labels, useSetting = inMemorySettings }: 
 /** Подписи. Без провайдера — английские дефолты: компонент не должен падать из-за забытой обёртки. */
 export function useUiLabels(): UiLabels {
   return useContext(UiContext)?.labels ?? DEFAULT_LABELS;
+}
+
+/** Обработчик смены темы из провайдера; без него переключатель просто ничего не делает сверх HeroUI. */
+export function useUiThemeChange(): ThemeChangeHandler | undefined {
+  return useContext(UiContext)?.onThemeChange;
 }
 
 export function useUiSetting<T>(section: string, key: string, fallback: T): UiSetting<T> {

@@ -13,7 +13,6 @@ import { horizontalListSortingStrategy, SortableContext } from "@dnd-kit/sortabl
 import { Button } from "@heroui/react";
 import {
   type ColumnDef,
-  type ColumnSizingInfoState,
   type ColumnSizingState,
   flexRender,
   getCoreRowModel,
@@ -64,7 +63,7 @@ export interface DataTableProps<TData> {
   selectionResetSignal?: number | undefined;
   isLoading?: boolean | undefined;
   /** Запрос упал — показываем строку ошибки, а не (вводящую в заблуждение) пустоту. */
-  error?: unknown | undefined;
+  error?: unknown;
   emptyText?: string | undefined;
   title?: string | undefined;
   toolbar?: ReactNode | undefined;
@@ -128,7 +127,9 @@ export function DataTable<TData>({
   const empty = emptyText ?? labels.table.empty;
   const edit = editLabel ?? labels.actions.edit;
   const del = deleteLabel ?? labels.actions.delete;
-  const allKeys = useMemo(() => columns.map((c) => c.id as string), [columns]);
+  // Каждая колонка ОБЯЗАНА нести `id`: он и есть ключ, под которым хранятся порядок, видимость и
+  // ширины. Колонка без него сломала бы сохранённые настройки молча, поэтому здесь утверждение.
+  const allKeys = useMemo(() => columns.map((c) => c.id!), [columns]);
   const { value: state, setValue: save } = useUiSetting<ColumnState>(TABLE_COLUMNS_SECTION, code, EMPTY_STATE);
 
   const columnOrder = useMemo(() => mergeOrder(state.order ?? [], allKeys), [state.order, allKeys]);
@@ -136,8 +137,8 @@ export function DataTable<TData>({
     () => Object.fromEntries((state.hidden ?? []).map((k) => [k, false])),
     [state.hidden],
   );
-  const sorting = (state.sorting ?? []) as SortingState;
-  const hasActions = Boolean(onRowEdit || onRowDelete);
+  const sorting: SortingState = state.sorting ?? [];
+  const hasActions = onRowEdit !== undefined || onRowDelete !== undefined;
 
   // Ширины держим локально, пока тянут ручку: писать настройку на каждый кадр — это запрос в секунду
   // на пиксель. На сервер уходит результат, когда ручку отпустили.
@@ -168,7 +169,7 @@ export function DataTable<TData>({
     onSortingChange: (u) => save({ ...state, order: columnOrder, sorting: resolve(u, sorting) }),
     onColumnSizingChange: (u) => setSizing((prev) => resolve(u, prev)),
     onColumnSizingInfoChange: (u) => {
-      const info = resolve(u, table.getState().columnSizingInfo) as ColumnSizingInfoState;
+      const info = resolve(u, table.getState().columnSizingInfo);
       // Ручку отпустили → фиксируем ширины в настройках.
       if (!info.isResizingColumn && table.getState().columnSizingInfo.isResizingColumn) {
         save({ ...state, order: columnOrder, sizes: sizing });

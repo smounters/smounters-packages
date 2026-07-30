@@ -31,8 +31,11 @@ export interface AppLayoutProps {
   logo?: ReactNode | undefined;
   /** Заголовок, когда роут не совпал ни с одним пунктом меню. */
   defaultTitle?: string | undefined;
-  /** Прибитый к низу сайдбара блок (переключатель приложений, версия). */
-  sidebarFooter?: ReactNode | undefined;
+  /**
+   * Прибитый к низу сайдбара блок (переключатель приложений, версия). Функцией — если у блока есть
+   * свой компактный вид: в свёрнутом сайдбаре узлу иначе не узнать, что рисовать только иконки.
+   */
+  sidebarFooter?: ReactNode | ((compact: boolean) => ReactNode) | undefined;
   headerActions?: ReactNode | undefined;
   userEmail?: string | undefined;
   userBadge?: ReactNode | undefined;
@@ -43,6 +46,11 @@ export interface AppLayoutProps {
   onLocaleChange?: ((locale: string) => void) | undefined;
   /** Полоса над контентом на всю ширину (например, баннер просмотра от имени клиента). */
   banner?: ReactNode | undefined;
+}
+
+/** Подвал сайдбара: узлом — как есть, функцией — с текущей свёрнутостью (у блока свой компактный вид). */
+function renderFooter(footer: AppLayoutProps["sidebarFooter"], compact: boolean): ReactNode {
+  return typeof footer === "function" ? footer(compact) : footer;
 }
 
 function useIsMobile(): boolean {
@@ -128,7 +136,7 @@ export function AppLayout({
           compact={compact}
           appName={appName}
           logo={logo}
-          footer={compact ? undefined : sidebarFooter}
+          footer={renderFooter(sidebarFooter, compact)}
         />
         {!compact && (
           // Ручка на правом крае; двойной клик возвращает дефолтную ширину.
@@ -164,7 +172,7 @@ export function AppLayout({
               compact={false}
               appName={appName}
               logo={logo}
-              footer={sidebarFooter}
+              footer={renderFooter(sidebarFooter, false)}
               onNavigate={() => setDrawerOpen(false)}
             />
           </aside>

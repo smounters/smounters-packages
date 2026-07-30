@@ -8,7 +8,7 @@ export interface EnumOption<T extends string | number> {
 
 export interface EnumSelectProps<T extends string | number> {
   value: T;
-  options: ReadonlyArray<EnumOption<T>>;
+  options: readonly EnumOption<T>[];
   onChange: (value: T) => void;
   /** Подпись для screen reader'а, если рядом нет видимого лейбла. */
   ariaLabel?: string | undefined;
@@ -49,7 +49,7 @@ export function EnumSelect<T extends string | number>({
       {...(className ? { className } : {})}
     >
       <Select.Trigger>
-        <Select.Value>{({ selectedText }) => selectedText || placeholder || ""}</Select.Value>
+        <Select.Value>{({ selectedText }) => (selectedText ? selectedText : (placeholder ?? ""))}</Select.Value>
         <Select.Indicator />
       </Select.Trigger>
       <Select.Popover>

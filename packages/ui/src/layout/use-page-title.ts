@@ -6,7 +6,9 @@ export function usePageTitle(title?: string): void {
   const { defaultTitle, setPageTitle } = usePageTitleContext();
 
   useEffect(() => {
-    const final = title || defaultTitle;
+    // Именно проверка на ПУСТОТУ, а не `??`: экран, передавший "" (например пока грузится название
+    // записи), должен получить заголовок роута, а не пустую вкладку.
+    const final = title !== undefined && title !== "" ? title : defaultTitle;
     document.title = final;
     setPageTitle(final);
   }, [title, defaultTitle, setPageTitle]);
