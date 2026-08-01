@@ -33,6 +33,8 @@ export interface UiLabels {
     delete: string;
     resize: string;
     signOut: string;
+    showSecret: string;
+    hideSecret: string;
   };
   table: {
     columns: string;
@@ -65,7 +67,16 @@ export interface UiLabels {
 }
 
 export const DEFAULT_LABELS: UiLabels = {
-  actions: { save: "Save", cancel: "Cancel", edit: "Edit", delete: "Delete", resize: "Resize", signOut: "Sign out" },
+  actions: {
+    save: "Save",
+    cancel: "Cancel",
+    edit: "Edit",
+    delete: "Delete",
+    resize: "Resize",
+    signOut: "Sign out",
+    showSecret: "Show",
+    hideSecret: "Hide",
+  },
   table: {
     columns: "Columns",
     resetColumns: "Reset columns",

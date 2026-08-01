@@ -64,6 +64,9 @@ function createModule(listeners: Function[]) {
   return TestModule;
 }
 
+// Порты НИЖЕ эфемерного диапазона Linux (ip_local_port_range, обычно от ~32768): раньше здесь были
+// 48200-48205, а их ОС раздаёт ИСХОДЯЩИМ соединениям — открытый сокет к Redis занимал такой порт, и
+// тест падал EADDRINUSE без всякой связи с кодом.
 describe("EventModule", () => {
   let app: Application;
 
@@ -74,7 +77,7 @@ describe("EventModule", () => {
 
   it("registers handlers from @OnEvent decorated methods", async () => {
     app = new Application(createModule([TradeListener]), { host: "127.0.0.1" });
-    await app.start({ port: 48200, health: true });
+    await app.start({ port: 19201, health: true });
 
     const events = app.resolve(EventService);
     const handlers = events.getHandlers();
@@ -86,7 +89,7 @@ describe("EventModule", () => {
 
   it("emits to exact match handlers", async () => {
     app = new Application(createModule([TradeListener]), { host: "127.0.0.1" });
-    await app.start({ port: 48201, health: true });
+    await app.start({ port: 19202, health: true });
 
     const events = app.resolve(EventService);
     await events.emit("trade.opened", { symbol: "BTC" });
@@ -98,7 +101,7 @@ describe("EventModule", () => {
 
   it("emits to wildcard handlers", async () => {
     app = new Application(createModule([WildcardListener]), { host: "127.0.0.1" });
-    await app.start({ port: 48202, health: true });
+    await app.start({ port: 19203, health: true });
 
     const events = app.resolve(EventService);
     await events.emit("trade.opened", { a: 1 });
@@ -111,7 +114,7 @@ describe("EventModule", () => {
 
   it("does not match unrelated events", async () => {
     app = new Application(createModule([TradeListener]), { host: "127.0.0.1" });
-    await app.start({ port: 48203, health: true });
+    await app.start({ port: 19204, health: true });
 
     const events = app.resolve(EventService);
     await events.emit("user.registered", {});
@@ -121,7 +124,7 @@ describe("EventModule", () => {
 
   it("handles async handlers", async () => {
     app = new Application(createModule([AsyncListener]), { host: "127.0.0.1" });
-    await app.start({ port: 48204, health: true });
+    await app.start({ port: 19205, health: true });
 
     const events = app.resolve(EventService);
     await events.emit("async.test", "data");
@@ -131,7 +134,7 @@ describe("EventModule", () => {
 
   it("error in one handler does not block others", async () => {
     app = new Application(createModule([ErrorListener, TradeListener]), { host: "127.0.0.1" });
-    await app.start({ port: 48205, health: true });
+    await app.start({ port: 19206, health: true });
 
     const events = app.resolve(EventService);
 
@@ -147,7 +150,7 @@ describe("EventModule", () => {
 
   it("multiple handlers for same event all fire", async () => {
     app = new Application(createModule([TradeListener, WildcardListener]), { host: "127.0.0.1" });
-    await app.start({ port: 48206, health: true });
+    await app.start({ port: 19207, health: true });
 
     const events = app.resolve(EventService);
     await events.emit("trade.opened", { x: 1 });
@@ -160,7 +163,7 @@ describe("EventModule", () => {
 
   it("skips listeners without @OnEvent", async () => {
     app = new Application(createModule([NoEventsService, TradeListener]), { host: "127.0.0.1" });
-    await app.start({ port: 48207, health: true });
+    await app.start({ port: 19208, health: true });
 
     const events = app.resolve(EventService);
     const handlers = events.getHandlers();

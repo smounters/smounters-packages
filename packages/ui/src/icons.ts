@@ -41,6 +41,14 @@ export const ICONS = {
   add: "solar:add-circle-linear",
   copy: "solar:copy-linear",
   delete: "solar:trash-bin-minimalistic-linear",
+  // #136 — правка строки помечается карандашом, а не гаечным ключом: тем же ключом рисуется меню
+  // колонок, и две разные операции выглядели одинаково.
+  edit: "solar:pen-2-linear",
+  columns: "solar:list-check-linear",
+  eyeClosed: "solar:eye-closed-linear",
+  check: "solar:check-circle-linear",
+  close: "solar:close-circle-linear",
+  warning: "solar:danger-triangle-linear",
 } as const;
 
 export type IconName = keyof typeof ICONS;
