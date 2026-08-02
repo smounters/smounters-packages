@@ -10,7 +10,6 @@ import {
 } from "@dnd-kit/core";
 import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import { horizontalListSortingStrategy, SortableContext } from "@dnd-kit/sortable";
-import { Button } from "@heroui/react";
 import {
   type ColumnDef,
   type ColumnSizingState,
@@ -25,7 +24,6 @@ import {
 } from "@tanstack/react-table";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useUiLabels, useUiSetting } from "../../provider";
-import { ICONS, Icon } from "../../icons";
 import { ActionButton } from "../ActionButton";
 import { ColumnsMenu } from "./ColumnsMenu";
 import { DraggableCell } from "./DraggableCell";
@@ -357,14 +355,12 @@ export function DataTable<TData>({
                           <ActionButton icon="edit" onPress={() => onRowEdit(row.original)} aria-label={edit} />
                         )}
                         {onRowDelete && (
-                          <Button
-                            size="sm"
-                            variant="danger-soft"
+                          <ActionButton
+                            icon="delete"
+                            tone="danger-soft"
                             onPress={() => onRowDelete(row.original)}
                             aria-label={del}
-                          >
-                            <Icon icon={ICONS.delete} width={16} height={16} />
-                          </Button>
+                          />
                         )}
                       </td>
                     )}

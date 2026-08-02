@@ -4,7 +4,16 @@ import { Icon, type IconName, ICONS } from "../icons";
 
 // У кнопки HeroUI вариантов шесть, а в токенах есть ещё success/warning — их рисуем поверх базового
 // варианта классами по токенам, чтобы «удалить» и «подтвердить» выглядели одинаково во всех кабинетах.
-export type ActionTone = "primary" | "secondary" | "tertiary" | "ghost" | "outline" | "danger" | "success" | "warning";
+export type ActionTone =
+  | "primary"
+  | "secondary"
+  | "tertiary"
+  | "ghost"
+  | "outline"
+  | "danger"
+  | "danger-soft"
+  | "success"
+  | "warning";
 
 const EXTRA_TONE: Partial<Record<ActionTone, { variant: "outline"; className: string }>> = {
   success: { variant: "outline", className: "border-success/50 text-success hover:bg-success/10" },
