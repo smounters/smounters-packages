@@ -1,3 +1,4 @@
+import { EnumSelect } from "../EnumSelect";
 import { useUiLabels } from "../../provider";
 import { ICONS, Icon } from "../../icons";
 
@@ -13,8 +14,6 @@ export interface PaginatorProps {
 
 const ICON_BTN =
   "inline-flex size-8 items-center justify-center rounded-full border border-border bg-surface text-foreground transition-colors hover:bg-surface-secondary disabled:opacity-40 disabled:hover:bg-surface outline-none focus-visible:ring-2 focus-visible:ring-focus";
-const SELECT =
-  "h-8 rounded-medium border border-border bg-surface px-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-focus";
 
 /** Пагинатор таблицы. Серверный: отдаёт наружу новый offset/limit, данные перезапрашивает вызывающий. */
 export function Paginator({
@@ -36,18 +35,13 @@ export function Paginator({
         {onLimitChange && (
           <>
             <span>{table.perPage}</span>
-            <select
-              className={SELECT}
+            <EnumSelect
               value={limit}
-              onChange={(e) => onLimitChange(Number(e.target.value))}
-              aria-label={table.rowsPerPage}
-            >
-              {pageSizes.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
+              options={pageSizes.map((n) => ({ value: n, label: String(n) }))}
+              onChange={onLimitChange}
+              ariaLabel={table.rowsPerPage}
+              className="w-20"
+            />
           </>
         )}
         <span className="whitespace-nowrap">
