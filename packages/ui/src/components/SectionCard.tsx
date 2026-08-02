@@ -10,7 +10,7 @@ export interface SectionCardProps {
   roomy?: boolean;
   /** Мелкий заголовок (h3) — для карточек внутри колонки, как на столе оператора. */
   small?: boolean;
-  /** Своя раскладка содержимого вместо колонки с отступом (например grid). */
+  /** Раскладка содержимого. Без заголовка по умолчанию НЕ оборачиваем — карточка остаётся одним div. */
   bodyClassName?: string;
   className?: string;
 }
@@ -21,7 +21,7 @@ export interface SectionCardProps {
  */
 export function SectionCard({ title, actions, children, roomy, small, bodyClassName, className }: SectionCardProps) {
   const pad = roomy ? "p-6" : "p-4";
-  const body = bodyClassName ?? "flex flex-col gap-3";
+  const body = bodyClassName ?? (title ? "flex flex-col gap-3" : null);
   const Heading = small ? "h3" : "h2";
   return (
     <div className={`rounded-large border border-border bg-surface ${pad} ${className ?? ""}`}>
@@ -31,7 +31,7 @@ export function SectionCard({ title, actions, children, roomy, small, bodyClassN
           {actions && <div className="flex items-center gap-2">{actions}</div>}
         </div>
       )}
-      <div className={body}>{children}</div>
+      {body === null ? children : <div className={body}>{children}</div>}
     </div>
   );
 }
