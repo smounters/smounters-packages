@@ -35,6 +35,7 @@ export interface UiLabels {
     signOut: string;
     showSecret: string;
     hideSecret: string;
+    confirm: string;
   };
   table: {
     columns: string;
@@ -76,6 +77,7 @@ export const DEFAULT_LABELS: UiLabels = {
     signOut: "Sign out",
     showSecret: "Show",
     hideSecret: "Hide",
+    confirm: "Confirm",
   },
   table: {
     columns: "Columns",

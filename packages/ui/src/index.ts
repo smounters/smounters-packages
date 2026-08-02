@@ -14,6 +14,8 @@ export {
   TABLE_COLUMNS_SECTION,
 } from "./components/DataTable";
 export { ActionButton, type ActionButtonProps, type ActionTone } from "./components/ActionButton";
+export { ConfirmProvider, type ConfirmRequest, useConfirm } from "./components/ConfirmDialog";
+export { ErrorNotice, type ErrorNoticeProps, errorText } from "./components/ErrorNotice";
 export { EnumSelect, type EnumOption, type EnumSelectProps } from "./components/EnumSelect";
 export { SecretInput, type SecretInputProps } from "./components/SecretInput";
 export { Field, FormDrawer, type FormDrawerProps, SELECT_CLASS } from "./components/FormDrawer";
@@ -24,6 +26,7 @@ export { ThemeSwitcher, type ThemeSwitcherLabels, type ThemeSwitcherProps } from
 export { useDebounce } from "./hooks/useDebounce";
 export { type Resizable, useResizable, type UseResizableOptions } from "./hooks/useResizable";
 export { type ServerTableQuery, useServerTable } from "./hooks/useServerTable";
+export { type ResourceDrawer, useResourceDrawer, type UseResourceDrawerOptions } from "./hooks/useResourceDrawer";
 export { ICONS, Icon, type IconName } from "./icons";
 export { AppLayout, type AppLayoutProps, LAYOUT_SECTION } from "./layout/AppLayout";
 export { getPageTitle } from "./layout/get-page-title";
