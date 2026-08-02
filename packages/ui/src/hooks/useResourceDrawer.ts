@@ -1,15 +1,18 @@
-import { useCallback, useState } from "react";
+import { type Dispatch, type SetStateAction, useCallback, useState } from "react";
 
 export interface ResourceDrawer<E, F> {
   open: boolean;
   /** Редактируемая сущность; null — создание. */
   editing: E | null;
   form: F;
-  setForm: (form: F) => void;
+  setForm: Dispatch<SetStateAction<F>>;
   /** Частичное обновление — самый частый вызов в формах. */
   patch: (part: Partial<F>) => void;
-  /** overrides — вычисляемые значения по умолчанию (следующая позиция, текущая организация). */
-  openNew: (overrides?: Partial<F>) => void;
+  // БЕЗ параметров: кнопки зовут его как onPress={drawer.openNew}, а HeroUI передаёт туда объект
+  // события — необязательный первый аргумент затёк бы в форму.
+  openNew: () => void;
+  /** Создание с вычисляемыми значениями (следующая позиция в списке, текущая организация). */
+  openNewWith: (overrides: Partial<F>) => void;
   openEdit: (entity: E) => void;
   close: () => void;
 }
@@ -34,14 +37,19 @@ export function useResourceDrawer<E, F>({ empty, toForm }: UseResourceDrawerOpti
   const [editing, setEditing] = useState<E | null>(null);
   const [form, setForm] = useState<F>(empty);
 
-  const openNew = useCallback(
-    (overrides?: Partial<F>) => {
+  const openNewWith = useCallback(
+    (overrides: Partial<F>) => {
       setEditing(null);
-      setForm(overrides ? { ...empty, ...overrides } : empty);
+      setForm({ ...empty, ...overrides });
       setOpen(true);
     },
     [empty],
   );
+  const openNew = useCallback(() => {
+    setEditing(null);
+    setForm(empty);
+    setOpen(true);
+  }, [empty]);
 
   const openEdit = useCallback(
     (entity: E) => {
@@ -55,5 +63,5 @@ export function useResourceDrawer<E, F>({ empty, toForm }: UseResourceDrawerOpti
   const patch = useCallback((part: Partial<F>) => setForm((f) => ({ ...f, ...part })), []);
   const close = useCallback(() => setOpen(false), []);
 
-  return { open, editing, form, setForm, patch, openNew, openEdit, close };
+  return { open, editing, form, setForm, patch, openNew, openNewWith, openEdit, close };
 }
