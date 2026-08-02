@@ -8,7 +8,8 @@ export interface ResourceDrawer<E, F> {
   setForm: (form: F) => void;
   /** Частичное обновление — самый частый вызов в формах. */
   patch: (part: Partial<F>) => void;
-  openNew: () => void;
+  /** overrides — вычисляемые значения по умолчанию (следующая позиция, текущая организация). */
+  openNew: (overrides?: Partial<F>) => void;
   openEdit: (entity: E) => void;
   close: () => void;
 }
@@ -33,11 +34,14 @@ export function useResourceDrawer<E, F>({ empty, toForm }: UseResourceDrawerOpti
   const [editing, setEditing] = useState<E | null>(null);
   const [form, setForm] = useState<F>(empty);
 
-  const openNew = useCallback(() => {
-    setEditing(null);
-    setForm(empty);
-    setOpen(true);
-  }, [empty]);
+  const openNew = useCallback(
+    (overrides?: Partial<F>) => {
+      setEditing(null);
+      setForm(overrides ? { ...empty, ...overrides } : empty);
+      setOpen(true);
+    },
+    [empty],
+  );
 
   const openEdit = useCallback(
     (entity: E) => {
