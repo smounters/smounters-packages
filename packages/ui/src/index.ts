@@ -18,6 +18,7 @@ export { ConfirmProvider, type ConfirmRequest, useConfirm } from "./components/C
 export { ErrorNotice, type ErrorNoticeProps, errorText } from "./components/ErrorNotice";
 export { EnumSelect, type EnumOption, type EnumSelectProps, toOptions } from "./components/EnumSelect";
 export { LookupSelect, type LookupSelectProps } from "./components/LookupSelect";
+export { SectionCard, type SectionCardProps } from "./components/SectionCard";
 export { SecretInput, type SecretInputProps } from "./components/SecretInput";
 export { Field, FormDrawer, type FormDrawerProps, SELECT_CLASS } from "./components/FormDrawer";
 export { type LanguageOption, LanguageSwitcher, type LanguageSwitcherProps } from "./components/LanguageSwitcher";
