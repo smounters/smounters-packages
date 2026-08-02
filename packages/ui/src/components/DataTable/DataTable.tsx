@@ -26,6 +26,7 @@ import {
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useUiLabels, useUiSetting } from "../../provider";
 import { ICONS, Icon } from "../../icons";
+import { ActionButton } from "../ActionButton";
 import { ColumnsMenu } from "./ColumnsMenu";
 import { DraggableCell } from "./DraggableCell";
 import { DraggableHeader } from "./DraggableHeader";
@@ -353,9 +354,7 @@ export function DataTable<TData>({
                       // biome-ignore lint/a11y/useKeyWithClickEvents: гасит всплытие клика по строке, сами действия — кнопки
                       <td className={`${TD} whitespace-nowrap text-right`} onClick={(e) => e.stopPropagation()}>
                         {onRowEdit && (
-                          <Button size="sm" variant="ghost" onPress={() => onRowEdit(row.original)} aria-label={edit}>
-                            <Icon icon={ICONS.settings} width={16} height={16} />
-                          </Button>
+                          <ActionButton icon="edit" onPress={() => onRowEdit(row.original)} aria-label={edit} />
                         )}
                         {onRowDelete && (
                           <Button

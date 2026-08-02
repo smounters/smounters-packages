@@ -51,7 +51,7 @@ export function ColumnsMenu<TData>({
         aria-label={lbl}
         className="inline-flex size-9 cursor-pointer list-none items-center justify-center rounded-full border border-border bg-surface text-foreground transition-colors hover:bg-surface-secondary [&::-webkit-details-marker]:hidden"
       >
-        <Icon icon={ICONS.settings} width={18} height={18} aria-hidden />
+        <Icon icon={ICONS.columns} width={18} height={18} aria-hidden />
       </summary>
       <div className="absolute right-0 z-20 mt-1 w-60 rounded-medium border border-border bg-surface p-2 shadow-lg">
         <p className="px-1 pb-1 text-xs font-medium uppercase tracking-wide text-muted">{lbl}</p>
