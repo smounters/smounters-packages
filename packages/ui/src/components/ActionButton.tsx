@@ -12,12 +12,15 @@ export type ActionTone =
   | "outline"
   | "danger"
   | "danger-soft"
+  | "danger-ghost"
   | "success"
   | "warning";
 
-const EXTRA_TONE: Partial<Record<ActionTone, { variant: "outline"; className: string }>> = {
+const EXTRA_TONE: Partial<Record<ActionTone, { variant: "outline" | "ghost"; className: string }>> = {
   success: { variant: "outline", className: "border-success/50 text-success hover:bg-success/10" },
   warning: { variant: "outline", className: "border-warning/50 text-warning hover:bg-warning/10" },
+  // Опасное действие рядом с обычным (правка и удаление в строке): одинаковый вес, разница только в цвете.
+  "danger-ghost": { variant: "ghost", className: "text-danger hover:bg-danger/10" },
 };
 
 type ButtonProps = ComponentPropsWithRef<typeof Button>;

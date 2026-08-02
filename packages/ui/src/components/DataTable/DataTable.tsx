@@ -357,7 +357,7 @@ export function DataTable<TData>({
                         {onRowDelete && (
                           <ActionButton
                             icon="delete"
-                            tone="danger-soft"
+                            tone="danger-ghost"
                             onPress={() => onRowDelete(row.original)}
                             aria-label={del}
                           />
