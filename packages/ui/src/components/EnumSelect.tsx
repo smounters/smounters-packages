@@ -6,6 +6,19 @@ export interface EnumOption<T extends string | number> {
   label: string;
 }
 
+/**
+ * Массив + два аксессора → options. Нужна потому, что варианты приходят в разной форме: массив значений,
+ * Object.entries со СТРОКОВЫМИ ключами, список объектов с id. Приведение типа значения (например
+ * Number(k) для entries) делает вызывающий — здесь оно осталось бы незаметным.
+ */
+export function toOptions<T, V extends string | number>(
+  items: readonly T[] | undefined,
+  getValue: (item: T) => V,
+  getLabel: (item: T) => string,
+): EnumOption<V>[] {
+  return (items ?? []).map((it) => ({ value: getValue(it), label: getLabel(it) }));
+}
+
 export interface EnumSelectProps<T extends string | number> {
   value: T;
   options: readonly EnumOption<T>[];

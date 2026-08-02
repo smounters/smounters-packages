@@ -16,7 +16,7 @@ export {
 export { ActionButton, type ActionButtonProps, type ActionTone } from "./components/ActionButton";
 export { ConfirmProvider, type ConfirmRequest, useConfirm } from "./components/ConfirmDialog";
 export { ErrorNotice, type ErrorNoticeProps, errorText } from "./components/ErrorNotice";
-export { EnumSelect, type EnumOption, type EnumSelectProps } from "./components/EnumSelect";
+export { EnumSelect, type EnumOption, type EnumSelectProps, toOptions } from "./components/EnumSelect";
 export { LookupSelect, type LookupSelectProps } from "./components/LookupSelect";
 export { SecretInput, type SecretInputProps } from "./components/SecretInput";
 export { Field, FormDrawer, type FormDrawerProps, SELECT_CLASS } from "./components/FormDrawer";
