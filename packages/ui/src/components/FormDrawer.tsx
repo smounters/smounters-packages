@@ -50,6 +50,13 @@ export interface FormDrawerProps {
   submitLabel?: string | undefined;
   cancelLabel?: string | undefined;
   error?: string | null | undefined;
+  /**
+   * Дополнительное действие формы (например «Проверить соединение»). Встаёт в подвал рядом с
+   * «Сохранить», а не в тело: это действие над формой целиком, и место ему там же, где остальные её
+   * кнопки. «Отмена» при этом уходит к левому краю — уводить необратимое действие подальше от
+   * подтверждающих полезно и само по себе.
+   */
+  footerActions?: ReactNode;
   children: ReactNode;
 }
 
@@ -64,6 +71,7 @@ export function FormDrawer({
   submitLabel,
   cancelLabel,
   error,
+  footerActions,
   children,
 }: FormDrawerProps) {
   const { actions } = useUiLabels();
@@ -136,14 +144,18 @@ export function FormDrawer({
           className="flex min-h-0 flex-1 flex-col"
         >
           <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-5 py-4">{children}</div>
-          {error && <p className="px-5 text-sm text-danger">{error}</p>}
-          <div className="flex justify-end gap-2 border-border border-t px-5 py-4">
+          {/* Полоса ошибки — прямо над подвалом: ближе всего к кнопке, которая её вызвала. */}
+          {error && <p className="px-5 pb-2 text-sm text-danger">{error}</p>}
+          <div className="flex items-center justify-between gap-6 border-border border-t px-5 py-4">
             <Button type="button" variant="ghost" onPress={onClose} isDisabled={busy ?? false}>
               {cancel}
             </Button>
-            <Button type="submit" isDisabled={(busy ?? false) || (submitDisabled ?? false)}>
-              {busy ? "…" : submit}
-            </Button>
+            <div className="flex items-center gap-2">
+              {footerActions}
+              <Button type="submit" isDisabled={(busy ?? false) || (submitDisabled ?? false)}>
+                {busy ? "…" : submit}
+              </Button>
+            </div>
           </div>
         </form>
       </div>
