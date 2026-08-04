@@ -25,9 +25,14 @@ function readDrawerWidth(): number {
   return v >= DRAWER_MIN_WIDTH ? v : DRAWER_DEFAULT_WIDTH;
 }
 
-/** Общий класс для нативных <select>: у HeroUI Select слишком тяжёлый API для простых перечислений. */
+/**
+ * Общий класс для нативных <select>: у HeroUI Select слишком тяжёлый API для простых перечислений.
+ *
+ * Состояние `disabled` обязано быть ВИДНЫМ: без него заблокированный список выглядит как рабочий, и
+ * клик по нему читается как поломка интерфейса, а не как «это поле менять нельзя».
+ */
 export const SELECT_CLASS =
-  "app-select appearance-none rounded-medium border border-border bg-surface py-2 pl-3 pr-9 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-focus";
+  "app-select appearance-none rounded-medium border border-border bg-surface py-2 pl-3 pr-9 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-60";
 
 /** Строка формы. Именно <div>, а не <label>: контрол внутри произвольный и несёт доступность сам. */
 export function Field({ label, hint, children }: { label: string; hint?: string | undefined; children: ReactNode }) {
