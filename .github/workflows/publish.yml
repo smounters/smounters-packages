@@ -70,6 +70,7 @@ jobs:
           - "@smounters/ui"
           - "@smounters/kit"
           - "@smounters/data"
+          - "@smounters/auth"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

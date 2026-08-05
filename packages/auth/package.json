@@ -1,0 +1,43 @@
+{
+  "name": "@smounters/auth",
+  "version": "2.2.0",
+  "description": "Provider-agnostic OAuth2/OIDC mechanics: authorize URL, PKCE, code exchange, id_token verification, profile normalization.",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smounters/smounters-packages.git",
+    "directory": "packages/auth"
+  },
+  "exports": {
+    "./oauth": {
+      "types": "./dist/oauth/index.d.ts",
+      "import": "./dist/oauth/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "test": "vitest run",
+    "clean": "rm -rf dist",
+    "prepack": "pnpm run clean && pnpm run build",
+    "prepublishOnly": "pnpm run clean && pnpm run build"
+  },
+  "peerDependencies": {
+    "jose": "^6"
+  },
+  "devDependencies": {
+    "jose": "^6.1.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
