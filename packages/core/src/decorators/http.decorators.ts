@@ -61,7 +61,7 @@ function setParamMeta(target: object, propertyKey: string | symbol | undefined, 
 
 function paramDecorator(source: HttpParamSource, key?: string): ParameterDecorator {
   return (target, propertyKey, index) => {
-    setParamMeta(target as object, propertyKey ?? undefined, {
+    setParamMeta(target, propertyKey ?? undefined, {
       index,
       source,
       key,

@@ -17,7 +17,7 @@ function reportRpcError(app: AppContainer, details: Record<string, unknown>, err
     type: "rpc",
     handler: details.handler as string | undefined,
     controller: details.controller as string | undefined,
-    procedure: details.procedure as string | undefined,
+    procedure: details.procedure,
   });
 }
 

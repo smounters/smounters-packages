@@ -243,7 +243,7 @@ export class AppContainer {
 
   constructor() {
     this.root = container.createChildContainer();
-    this.setConfig(process.env as Record<string, unknown>);
+    this.setConfig(process.env);
     this.setLogger(createLogger());
     this.root.registerSingleton(ConfigService, ConfigService);
     this.root.registerSingleton(LoggerService, LoggerService);
@@ -765,7 +765,7 @@ export class AppContainer {
 
     this.setConfig(data as Record<string, unknown>);
 
-    return data as output<TSchema>;
+    return data;
   }
 
   getConfig<TConfig extends Record<string, unknown> = Record<string, unknown>>(): Readonly<TConfig> {

@@ -126,7 +126,7 @@ export async function fetchProfile(input: ProfileInput): Promise<OAuthProfile> {
         issuer: endpoints.issuer,
         audience: config.clientId,
       });
-      claims = verified.payload as Record<string, unknown>;
+      claims = verified.payload;
     } catch (err) {
       throw new OAuthError(`id_token rejected: ${(err as Error).message}`, "profile");
     }
@@ -178,5 +178,4 @@ export async function fetchProfile(input: ProfileInput): Promise<OAuthProfile> {
 }
 
 /** Reads an id_token WITHOUT verifying it — diagnostics only, never for an access decision. */
-export const peekIdToken = (idToken: string): Record<string, unknown> =>
-  decodeJwt(idToken) as Record<string, unknown>;
+export const peekIdToken = (idToken: string): Record<string, unknown> => decodeJwt(idToken);

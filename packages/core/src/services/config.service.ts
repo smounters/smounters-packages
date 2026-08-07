@@ -26,6 +26,6 @@ export class ConfigService<TConfig extends ConfigMap = ConfigMap> {
       throw new Error(message ?? `Missing config key: ${String(key)}`);
     }
 
-    return value as NonNullable<TConfig[K]>;
+    return value;
   }
 }

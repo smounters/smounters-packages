@@ -45,7 +45,7 @@ function setParamMeta(target: object, propertyKey: string | symbol | undefined, 
 
 function wsParamDecorator(source: WsParamSource): ParameterDecorator {
   return (target, propertyKey, index) => {
-    setParamMeta(target as object, propertyKey ?? undefined, { index, source });
+    setParamMeta(target, propertyKey ?? undefined, { index, source });
   };
 }
 

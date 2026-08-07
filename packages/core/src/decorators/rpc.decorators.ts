@@ -59,7 +59,7 @@ function setParamMeta(target: object, propertyKey: string | symbol | undefined, 
 
 function rpcParamDecorator(source: RpcParamSource, key?: string): ParameterDecorator {
   return (target, propertyKey, index) => {
-    setParamMeta(target as object, propertyKey ?? undefined, {
+    setParamMeta(target, propertyKey ?? undefined, {
       index,
       source,
       key,

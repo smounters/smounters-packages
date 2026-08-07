@@ -18,7 +18,7 @@ function reportRpcError(app: AppContainer, details: Record<string, unknown>, err
     type: "rpc",
     handler: details.handler as string | undefined,
     controller: details.controller as string | undefined,
-    procedure: details.procedure as string | undefined,
+    procedure: details.procedure,
   });
 }
 
@@ -201,7 +201,7 @@ export function createRpcHandler<TController extends Record<string, unknown>>(
         const next = async (): Promise<RpcResponse> => {
           idx++;
           if (idx < interceptors.length) {
-            return (await interceptors[idx]!.intercept(ctx, next)) as RpcResponse;
+            return (await interceptors[idx].intercept(ctx, next)) as RpcResponse;
           }
 
           return controllerHandler(...args);

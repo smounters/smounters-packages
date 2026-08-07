@@ -25,8 +25,8 @@ function reportHttpError(app: AppContainer, details: Record<string, unknown>, er
     type: "http",
     handler: details.handler as string | undefined,
     controller: details.controller as string | undefined,
-    method: details.method as string | undefined,
-    url: details.url as string | undefined,
+    method: details.method,
+    url: details.url,
   });
 }
 
@@ -234,7 +234,7 @@ export function createHttpHandler<TController extends Record<string, unknown>>(
         const next = async (): Promise<unknown> => {
           idx++;
           if (idx < interceptors.length) {
-            return interceptors[idx]!.intercept(ctx, next);
+            return interceptors[idx].intercept(ctx, next);
           }
 
           return controllerHandler(...transformedArgs);
