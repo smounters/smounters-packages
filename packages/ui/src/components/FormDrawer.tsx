@@ -65,6 +65,17 @@ export interface FormDrawerProps {
   children: ReactNode;
 }
 
+/** Крутящийся индикатор в кнопке: пока бэкенд проверяет введённое (токен бота, доступ к чату), форма
+ * молчала по нескольку секунд и выглядела зависшей — многоточие вместо подписи это не читалось. */
+function BusySpinner() {
+  return (
+    <svg className="animate-spin" width={14} height={14} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.25" strokeWidth="3" />
+      <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 /** Правая выезжающая панель под создание/редактирование. Внутри настоящая <form> — Enter отправляет. */
 export function FormDrawer({
   open,
@@ -146,6 +157,7 @@ export function FormDrawer({
           onSubmit={(e) => {
             void handle(e);
           }}
+          aria-busy={busy ?? false}
           className="flex min-h-0 flex-1 flex-col"
         >
           <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-5 py-4">{children}</div>
@@ -158,7 +170,8 @@ export function FormDrawer({
             <div className="flex items-center gap-2">
               {footerActions}
               <Button type="submit" isDisabled={(busy ?? false) || (submitDisabled ?? false)}>
-                {busy ? "…" : submit}
+                {busy && <BusySpinner />}
+                {submit}
               </Button>
             </div>
           </div>
