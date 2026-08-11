@@ -256,7 +256,11 @@ export function DataTable<TData>({
         onDragEnd={onDragEnd}
       >
         <div className="overflow-x-auto rounded-large border border-border bg-surface">
-          <table className="w-full border-collapse">
+          {/* Полоса под шапкой (см. styles.css) — единственный признак фоновой работы: пока строки уже
+              показаны, подменять их текстом нельзя (таблица прыгает, пользователь теряет место). На
+              самой первой загрузке (строк ещё нет) тело просто пустое — полоса под шапкой и есть сигнал,
+              никакого текста «Загрузка…» в компоненте нет вообще. */}
+          <table className="w-full border-collapse" data-table-busy={isLoading ? "" : undefined}>
             <thead>
               <tr className="border-border border-b">
                 {/* Колонка выделения — вне SortableContext: её не перетаскивают и не прячут. */}
@@ -289,13 +293,7 @@ export function DataTable<TData>({
               </tr>
             </thead>
             <tbody>
-              {isLoading ? (
-                <tr>
-                  <td className={`${TD} text-muted`} colSpan={colCount}>
-                    {labels.table.loading}
-                  </td>
-                </tr>
-              ) : error ? (
+              {error ? (
                 <tr>
                   <td className={`${TD} text-danger`} colSpan={colCount}>
                     {labels.table.loadError(
@@ -304,11 +302,15 @@ export function DataTable<TData>({
                   </td>
                 </tr>
               ) : data.length === 0 ? (
-                <tr>
-                  <td className={`${TD} text-muted`} colSpan={colCount}>
-                    {empty}
-                  </td>
-                </tr>
+                // Идёт первая загрузка — пусто, полоса под шапкой уже говорит «идёт работа»; текст
+                // «пусто» ставим ТОЛЬКО когда загрузка закончилась и строк подтверждённо нет.
+                isLoading ? null : (
+                  <tr>
+                    <td className={`${TD} text-muted`} colSpan={colCount}>
+                      {empty}
+                    </td>
+                  </tr>
+                )
               ) : (
                 table.getRowModel().rows.map((row) => (
                   <tr

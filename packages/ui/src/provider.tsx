@@ -41,7 +41,6 @@ export interface UiLabels {
     columns: string;
     resetColumns: string;
     empty: string;
-    loading: string;
     loadError: (message: string) => string;
     loadErrorFallback: string;
     dragColumn: string;
@@ -83,7 +82,6 @@ export const DEFAULT_LABELS: UiLabels = {
     columns: "Columns",
     resetColumns: "Reset columns",
     empty: "Nothing here yet",
-    loading: "Loading…",
     loadError: (message) => `Failed to load: ${message}`,
     loadErrorFallback: "unknown error",
     dragColumn: "Drag to reorder",
