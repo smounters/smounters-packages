@@ -1,10 +1,17 @@
 import { Input } from "@heroui/react";
-import { type KeyboardEvent, useId, useMemo, useRef, useState } from "react";
+import { type KeyboardEvent, type ReactNode, useId, useMemo, useRef, useState } from "react";
 
 export interface SearchSelectOption {
   key: string;
   label: string;
   hint?: string;
+  /**
+   * Значок слева от подписи: эмодзи, `<img>`, узел иконочного набора — что угодно.
+   *
+   * Нужен там, где вариантов много и они однородны по форме: список из шести десятков названий
+   * читается построчно, а значок даёт глазу зацепку. Подписи он не заменяет и в поиске не участвует.
+   */
+  icon?: ReactNode;
 }
 
 export interface SearchSelectProps {
@@ -54,12 +61,22 @@ export function SearchSelect({
 
   const selected = options.find((o) => o.key === value);
   const matches = useMemo(() => {
-    const q = text.trim().toLowerCase();
+    const q = fold(text);
     // При серверном поиске список уже отфильтрован — фильтровать второй раз значит прятать то, что
     // сервер намеренно вернул (например совпадение по полю, которого нет в подписи).
-    const list = serverSide || !q ? options : options.filter((o) => o.label.toLowerCase().includes(q));
+    const list = serverSide || !q ? options : options.filter((o) => fold(o.label).includes(q));
     return list.slice(0, maxVisible);
   }, [options, text, serverSide, maxVisible]);
+
+  /**
+   * Место под значок резервируется, как только его подал ХОТЬ ОДИН вариант.
+   *
+   * Иначе отступ появлялся бы вместе с выбором и текст в поле прыгал бы вбок на каждый выбор — и
+   * ещё раз назад при открытии списка, где значка нет.
+   */
+  // Boolean(...) обязателен: ReactNode в типах React 19 включает Promise, и предикат, возвращающий
+  // сам узел, линтер справедливо считает возвратом промиса из синхронного колбэка.
+  const hasIcons = options.some((o) => Boolean(o.icon));
 
   const pick = (key: string) => {
     onChange(key);
@@ -82,11 +99,24 @@ export function SearchSelect({
     <div className="flex flex-col gap-1">
       {label && <span className="text-muted text-xs">{label}</span>}
       <div className="relative">
+        {/*
+          Значок выбранного варианта кладётся ПОВЕРХ поля, а не внутрь него: значение `<input>` —
+          строка, узел туда не положить ничем. Пока список открыт, значок убран: в поле тогда не
+          выбранное, а набранный запрос, и старая иконка рядом с ним врала бы.
+        */}
+        {hasIcons && !open && selected?.icon && (
+          <span
+            aria-hidden
+            className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 flex size-5 items-center justify-center"
+          >
+            {selected.icon}
+          </span>
+        )}
         {/* Отступ справа под стрелку: без него длинное название организации уезжает прямо под значок. */}
         <Input
           ref={inputRef}
           fullWidth
-          className="pr-9"
+          className={hasIcons ? "pr-9 pl-10" : "pr-9"}
           aria-label={label ?? ""}
           aria-controls={listId}
           aria-expanded={open}
@@ -131,7 +161,7 @@ export function SearchSelect({
                 <li key={o.key}>
                   <button
                     type="button"
-                    className={`w-full px-3 py-2 text-left text-sm hover:bg-surface-secondary ${
+                    className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-surface-secondary ${
                       o.key === value ? "text-accent" : "text-foreground"
                     }`}
                     // onMouseDown: onBlur поля гасит список раньше, чем сработал бы onClick.
@@ -140,8 +170,14 @@ export function SearchSelect({
                       pick(o.key);
                     }}
                   >
-                    {o.label}
-                    {o.hint && <span className="ml-2 text-muted text-xs">{o.hint}</span>}
+                    {/* Пустая ячейка у варианта без значка — иначе подписи в списке разъезжаются. */}
+                    {hasIcons && (
+                      <span aria-hidden className="flex size-5 shrink-0 items-center justify-center">
+                        {o.icon}
+                      </span>
+                    )}
+                    <span className="truncate">{o.label}</span>
+                    {o.hint && <span className="ml-auto shrink-0 text-muted text-xs">{o.hint}</span>}
                   </button>
                 </li>
               ))
@@ -151,4 +187,19 @@ export function SearchSelect({
       </div>
     </div>
   );
+}
+
+/**
+ * Приведение к виду, по которому сравниваем: регистр и диакритика снимаются.
+ *
+ * Без снятия диакритики поиск не находит ровно то, что чаще всего ищут с телефона: «plomeria» не
+ * совпадает с «Plomería», «Jose» — с «José». Набирать ударения на мобильной клавиатуре никто не
+ * будет, а совпадений от этого становится только больше — ни один прежний результат не пропадает.
+ */
+function fold(v: string): string {
+  return v
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
 }

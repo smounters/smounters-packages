@@ -14,6 +14,7 @@ npm i @smounters/ui @heroui/react @heroui/styles react-router-dom
 | `AppLayout` / `Sidebar` / `Navbar` | каркас: сайдбар (ширина тянется мышью, сворачивается), топбар с заголовком страницы, контент через `<Outlet/>` |
 | `DataTable` | TanStack Table + перетаскивание колонок (dnd-kit) + меню видимости + ресайз; порядок, ширины, видимость и сортировка сохраняются per-user; по желанию — выделение строк под массовые действия |
 | `FormDrawer` / `Field` | правая панель под создание/редактирование, ширина тянется за левый край |
+| `SearchSelect` / `EnumSelect` / `LookupSelect` | выбор одного значения: с поиском в том же поле (и значком у варианта), из перечисления, из списка-справочника |
 | `Paginator`, `StatusPill`, `StatCard`, `ThemeSwitcher`, `LanguageSwitcher` | мелкие общие компоненты |
 | `useResizable`, `useServerTable`, `useDebounce` | хуки |
 
