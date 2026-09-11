@@ -21,6 +21,8 @@ export { EnumSelect, type EnumOption, type EnumSelectProps, toOptions } from "./
 export { LookupSelect, type LookupSelectProps } from "./components/LookupSelect";
 export { SectionCard, type SectionCardProps } from "./components/SectionCard";
 export { SearchSelect, type SearchSelectOption, type SearchSelectProps } from "./components/SearchSelect";
+export { DateRangePicker, type DateRangePickerProps, type DateRange } from "./components/DateRangePicker";
+export { PageTabs, type PageTabsProps, type PageTab } from "./components/PageTabs";
 export { SecretInput, type SecretInputProps } from "./components/SecretInput";
 export { Field, FormDrawer, type FormDrawerProps, SELECT_CLASS } from "./components/FormDrawer";
 export { type LanguageOption, LanguageSwitcher, type LanguageSwitcherProps } from "./components/LanguageSwitcher";
