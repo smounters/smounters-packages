@@ -19,6 +19,7 @@ npm i @smounters/kit @smounters/core
 | `kit/config` | zod-препроцессоры для разбора env | `zod` |
 | `kit/money` | decimal-арифметика, масштабы, округление, проверка сбалансированности проводки | — |
 | `kit/rpc` | `ProtoValidateInterceptor` — правила `buf.validate` из контракта, enforced транспортом | `@smounters/core`, `@connectrpc/connect`, `@bufbuild/*` |
+| `kit/text` | подстановка `{{ }}` с экранированием под получателя, экранирование для SQL `LIKE`, разбор ФИО | — |
 | `kit/util` | `ulid`, `redactSecrets` | — |
 
 ## Что здесь НЕ лежит и почему

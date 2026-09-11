@@ -45,6 +45,10 @@
     "./util": {
       "types": "./dist/util/index.d.ts",
       "import": "./dist/util/index.js"
+    },
+    "./text": {
+      "types": "./dist/text/index.d.ts",
+      "import": "./dist/text/index.js"
     }
   },
   "files": [
