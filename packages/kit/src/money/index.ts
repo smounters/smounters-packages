@@ -6,8 +6,12 @@ import { Decimal } from "decimal.js";
 // represent its own amounts stops balancing within a day. Amounts travel as decimal STRINGS end to end
 // (numeric in the database, string on the wire) and are only turned into Decimal for the arithmetic.
 
-// Precision must exceed the widest intermediate we produce (a 20-digit amount divided by an 18-dp rate).
-Decimal.set({ precision: 50, toExpNeg: -50, toExpPos: 50 });
+// Precision must exceed the widest intermediate we produce. The widest column a consumer stores is
+// numeric(40,20) — 40 significant digits — and two of those can meet in one multiplication, so the
+// library must carry twice that before it starts rounding. decimal.js defaults to 20 SIGNIFICANT
+// digits and rounds even a plain addition down to them, silently: at 18 decimal places that loses
+// the tail of every sum. Importing this module is what fixes it for the whole process.
+Decimal.set({ precision: 80, toExpNeg: -80, toExpPos: 80 });
 
 /** Money scale: `numeric(20,4)`. Four decimal places cover fiat and keep every posting exact. */
 export const MONEY_SCALE = 4;
@@ -61,6 +65,51 @@ export function sumAmounts(amounts: readonly string[]): Decimal {
 /** Apply a signed delta to a balance, at money scale. */
 export function applyDelta(balance: string, amount: string): string {
   return toDecimal(balance).plus(toDecimal(amount)).toFixed(MONEY_SCALE);
+}
+
+export interface MoneyOptions {
+  /** Decimal places the storage column keeps. Anything more precise is rejected, never rounded away. */
+  scale: number;
+  /**
+   * Pad results to `scale` (`"100"` → `"100.0000"`). Off by default: a wide column (scale 20) would
+   * otherwise hand every caller a string of trailing zeros, and `"0.00000000000000000000" !== "0"`
+   * breaks every naive comparison downstream.
+   */
+  pad?: boolean;
+}
+
+export interface MoneyOps {
+  readonly scale: number;
+  readonly zero: string;
+  fits(amount: string): boolean;
+  toAmount(amount: string): string | null;
+  applyDelta(balance: string, amount: string): string;
+  quantize(amount: string, rounding?: Decimal.Rounding): string;
+}
+
+/**
+ * Money arithmetic bound to one storage scale.
+ *
+ * The scale is POLICY — a fiat-only ledger settles at 4 decimals, one that also holds tokens needs 18
+ * or more — so it belongs to the application, not to this package. The module-level `MONEY_SCALE`
+ * helpers remain as the scale-4 default for callers that never had to choose.
+ */
+export function createMoney({ scale, pad = false }: MoneyOptions): MoneyOps {
+  if (!Number.isInteger(scale) || scale < 0 || scale > 40) {
+    throw new RangeError(`Money scale must be an integer in 0..40, got ${scale}`);
+  }
+  const render = (d: Decimal): string => (pad ? d.toFixed(scale) : d.toFixed());
+  return {
+    scale,
+    zero: render(new Decimal(0)),
+    fits: (amount) => toDecimal(amount).decimalPlaces() <= scale,
+    toAmount: (amount) => {
+      const d = toDecimal(amount);
+      return d.decimalPlaces() > scale ? null : render(d);
+    },
+    applyDelta: (balance, amount) => render(toDecimal(balance).plus(toDecimal(amount))),
+    quantize: (amount, rounding = ROUND_HALF_UP) => toDecimal(amount).toFixed(scale, rounding),
+  };
 }
 
 export interface PostingLine {
