@@ -1,10 +1,13 @@
 import { Button, cn } from "@heroui/react";
 import { useUiLabels } from "../provider";
 import {
+  cloneElement,
   type FormEvent,
+  isValidElement,
   type ReactNode,
   type PointerEvent as ReactPointerEvent,
   useCallback,
+  useId,
   useRef,
   useState,
 } from "react";
@@ -34,12 +37,40 @@ function readDrawerWidth(): number {
 export const SELECT_CLASS =
   "app-select appearance-none rounded-medium border border-border bg-surface py-2 pl-3 pr-9 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-60";
 
-/** Строка формы. Именно <div>, а не <label>: контрол внутри произвольный и несёт доступность сам. */
+const LABELLABLE = new Set(["input", "select", "textarea"]);
+
+/**
+ * Строка формы.
+ *
+ * Обёртка — <div>, а не <label>: внутрь кладут и составные контролы (пикеры со своим выпадающим
+ * списком), и оборачивание их в <label> отправляло бы клик по элементу списка на первый попавшийся
+ * контрол.
+ *
+ * Но и просто нарисовать подпись <span>'ом нельзя — она тогда ни с чем не связана. Расчёт на то,
+ * что «контрол внутри несёт доступность сам», не оправдался: вызывающие передают голый <input>,
+ * рассчитывая на подпись отсюда, и поле остаётся вовсе без имени — экранный диктор называет его
+ * «поле ввода», а клик по подписи не ставит курсор. Поэтому для ПРОСТЫХ контролов
+ * (input/select/textarea без своего `id`) подпись становится <label for>, а идентификатор
+ * проставляется подстановкой. Составные и уже подписанные дети не трогаются.
+ */
 export function Field({ label, hint, children }: { label: string; hint?: string | undefined; children: ReactNode }) {
+  const id = useId();
+  const bindable =
+    isValidElement<{ id?: string }>(children) &&
+    children.props.id === undefined &&
+    typeof children.type === "string" &&
+    LABELLABLE.has(children.type);
+
   return (
     <div className="flex flex-col gap-1 text-sm">
-      <span className="text-muted">{label}</span>
-      {children}
+      {bindable ? (
+        <label className="text-muted" htmlFor={id}>
+          {label}
+        </label>
+      ) : (
+        <span className="text-muted">{label}</span>
+      )}
+      {bindable ? cloneElement(children as React.ReactElement<{ id?: string }>, { id }) : children}
       {hint && <span className="text-muted text-xs">{hint}</span>}
     </div>
   );
