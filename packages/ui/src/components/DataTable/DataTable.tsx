@@ -2,6 +2,8 @@ import {
   closestCenter,
   DndContext,
   type DragEndEvent,
+  type DragOverEvent,
+  type DragStartEvent,
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
@@ -225,7 +227,32 @@ export function DataTable<TData>({
     useSensor(KeyboardSensor),
   );
 
+  /*
+   * Куда встанет колонка — видно ЗАРАНЕЕ.
+   *
+   * Тело таблицы за колонкой не едет (ячейки намеренно не являются узлами dnd-kit), и без указателя
+   * перетаскивание читалось как «я что-то тащу, но куда — непонятно»: призрак заголовка с
+   * прозрачностью и больше ничего. Показываем границу, у которой колонка приземлится, и подсвечиваем
+   * ту, рядом с которой это произойдёт.
+   */
+  const [drag, setDrag] = useState<{ active: string; over: string } | null>(null);
+
+  const dropEdge = (columnId: string): "left" | "right" | undefined => {
+    if (drag?.over !== columnId || drag.active === columnId) return undefined;
+    const from = columnOrder.indexOf(drag.active);
+    const to = columnOrder.indexOf(drag.over);
+    if (from < 0 || to < 0) return undefined;
+    // Тащим вправо — колонка встанет ЗА цель, влево — перед ней.
+    return to > from ? "right" : "left";
+  };
+
+  const onDragStart = ({ active }: DragStartEvent) => setDrag({ active: String(active.id), over: String(active.id) });
+  const onDragOver = ({ active, over }: DragOverEvent) => {
+    if (over) setDrag({ active: String(active.id), over: String(over.id) });
+  };
+
   const onDragEnd = ({ active, over }: DragEndEvent) => {
+    setDrag(null);
     if (!over || active.id === over.id) return;
     const from = columnOrder.indexOf(active.id as string);
     const to = columnOrder.indexOf(over.id as string);
@@ -253,7 +280,10 @@ export function DataTable<TData>({
         sensors={sensors}
         collisionDetection={closestCenter}
         modifiers={[restrictToHorizontalAxis]}
+        onDragStart={onDragStart}
+        onDragOver={onDragOver}
         onDragEnd={onDragEnd}
+        onDragCancel={() => setDrag(null)}
       >
         <div className="overflow-x-auto rounded-large border border-border bg-surface">
           {/* Полоса под шапкой (см. styles.css) — единственный признак фоновой работы: пока строки уже
@@ -285,6 +315,7 @@ export function DataTable<TData>({
                       key={h.id}
                       header={h}
                       onResetWidth={resetWidth}
+                      {...(dropEdge(h.column.id) ? { dropEdge: dropEdge(h.column.id) } : {})}
                       {...(sizing[h.column.id] ? { width: sizing[h.column.id] } : {})}
                     />
                   ))}

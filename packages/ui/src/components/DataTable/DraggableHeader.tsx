@@ -18,10 +18,13 @@ const TH = "px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text
 export function DraggableHeader<TData>({
   header,
   width,
+  dropEdge,
   onResetWidth,
 }: {
   header: Header<TData, unknown>;
   width?: number | undefined;
+  /** У какой границы этой колонки приземлится перетаскиваемая. Пусто — эта колонка не цель. */
+  dropEdge?: "left" | "right" | undefined;
   /** Двойной клик по ручке: сбросить ширину. Нужен отдельно — `resetSize()` знает только про состояние
    *  таблицы, а сохранённую настройку пользователя надо убрать, иначе перезагрузка её вернёт. */
   onResetWidth?: ((columnId: string) => void) | undefined;
@@ -55,7 +58,14 @@ export function DraggableHeader<TData>({
   };
 
   return (
-    <th ref={setNodeRef} style={style} className={TH} {...attributes}>
+    <th ref={setNodeRef} style={style} className={`${TH} ${dropEdge ? "bg-accent/10" : ""}`} {...attributes}>
+      {/* Граница приземления. Поверх ручки ширины (у той z-10), иначе линия пряталась бы под ней. */}
+      {dropEdge && (
+        <span
+          aria-hidden
+          className={`absolute inset-y-0 z-20 w-0.5 bg-accent ${dropEdge === "left" ? "left-0" : "right-0"}`}
+        />
+      )}
       <div className="flex select-none items-center gap-1">
         <span
           {...listeners}
