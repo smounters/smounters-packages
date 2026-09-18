@@ -291,6 +291,24 @@ export function DataTable<TData>({
               самой первой загрузке (строк ещё нет) тело просто пустое — полоса под шапкой и есть сигнал,
               никакого текста «Загрузка…» в компоненте нет вообще. */}
           <table className="w-full border-collapse" data-table-busy={isLoading ? "" : undefined}>
+            {/*
+              Подсветка колонки-цели во ВСЮ высоту таблицы, а не только в шапке.
+              Красится `col`, а не каждая ячейка: фон колонки браузер рисует позади ячеек, поэтому
+              ни ячейкам, ни телу знать о перетаскивании не нужно — им незачем перерисовываться, и
+              они остаются вне dnd-kit. Подсветка одной шапки терялась: полоска в тридцать пикселей
+              над списком в двенадцать строк не читается как «сюда встанет».
+            */}
+            {drag && (
+              <colgroup>
+                {enableSelection && <col />}
+                {columnOrder
+                  .filter((id) => table.getColumn(id)?.getIsVisible())
+                  .map((id) => (
+                    <col key={id} className={drag.over === id ? "bg-accent/15" : undefined} />
+                  ))}
+                {hasActions && <col />}
+              </colgroup>
+            )}
             <thead>
               <tr className="border-border border-b">
                 {/* Колонка выделения — вне SortableContext: её не перетаскивают и не прячут. */}
