@@ -56,29 +56,49 @@ const LABELLABLE = new Set(["input", "select", "textarea"]);
  * контрол.
  *
  * Но и просто нарисовать подпись <span>'ом нельзя — она тогда ни с чем не связана. Расчёт на то,
- * что «контрол внутри несёт доступность сам», не оправдался: вызывающие передают голый <input>,
- * рассчитывая на подпись отсюда, и поле остаётся вовсе без имени — экранный диктор называет его
- * «поле ввода», а клик по подписи не ставит курсор. Поэтому для ПРОСТЫХ контролов
- * (input/select/textarea без своего `id`) подпись становится <label for>, а идентификатор
- * проставляется подстановкой. Составные и уже подписанные дети не трогаются.
+ * что «контрол внутри несёт доступность сам», не оправдался: вызывающие передают поле, рассчитывая
+ * на подпись отсюда, и оно остаётся вовсе без имени — диктор называет его «поле ввода», а клик по
+ * подписи не ставит курсор.
+ *
+ * Связывание идёт двумя способами, и это НЕ вкусовщина:
+ *
+ * - голый input/select/textarea — `id` + <label for>. Тег известен, атрибут точно доедет, клик по
+ *   подписи ставит курсор.
+ * - компонент — подпись получает `id`, а ребёнок `aria-labelledby`. Через <label for> так нельзя:
+ *   составной компонент может `id` не пробросить, и тогда `for` указывает в пустоту — проверено
+ *   живьём на экране настроек шлюза, где `label[for="_r_o_"]` не имел цели вовсе. Это ХУЖЕ
+ *   несвязанной подписи. Проглоченный `aria-labelledby` не оставляет висящей ссылки: подпись просто
+ *   остаётся подписью, как было до правки.
+ *
+ * Ребёнок, у которого уже есть своё имя, не трогается.
  */
 export function Field({ label, hint, children }: { label: string; hint?: string | undefined; children: ReactNode }) {
   const id = useId();
-  const bindable =
-    isValidElement<{ id?: string }>(children) &&
-    children.props.id === undefined &&
-    (typeof children.type === "string" ? LABELLABLE.has(children.type) : true);
+  const named =
+    isValidElement<{ id?: string; "aria-label"?: string; "aria-labelledby"?: string }>(children) &&
+    (children.props.id !== undefined ||
+      children.props["aria-label"] !== undefined ||
+      children.props["aria-labelledby"] !== undefined);
+  const host = isValidElement(children) && typeof children.type === "string";
+  const bindable = isValidElement(children) && !named;
+  const byFor = bindable && host && LABELLABLE.has(children.type as string);
+
+  const control = bindable
+    ? cloneElement(children as React.ReactElement<Record<string, unknown>>, byFor ? { id } : { "aria-labelledby": id })
+    : children;
 
   return (
     <div className="flex flex-col gap-1 text-sm">
-      {bindable ? (
+      {byFor ? (
         <label className="text-muted" htmlFor={id}>
           {label}
         </label>
       ) : (
-        <span className="text-muted">{label}</span>
+        <span className="text-muted" id={bindable ? id : undefined}>
+          {label}
+        </span>
       )}
-      {bindable ? cloneElement(children as React.ReactElement<{ id?: string }>, { id }) : children}
+      {control}
       {hint && <span className="text-muted text-xs">{hint}</span>}
     </div>
   );
