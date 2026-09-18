@@ -26,7 +26,7 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useUiLabels, useUiSetting } from "../../provider";
 import { ActionButton } from "../ActionButton";
 import { ColumnsMenu } from "./ColumnsMenu";
-import { DraggableCell } from "./DraggableCell";
+import { BodyCell } from "./BodyCell";
 import { DraggableHeader } from "./DraggableHeader";
 import { Paginator } from "./Paginator";
 
@@ -343,13 +343,11 @@ export function DataTable<TData>({
                         />
                       </td>
                     )}
-                    <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
-                      {row.getVisibleCells().map((cell) => (
-                        <DraggableCell key={cell.id} columnId={cell.column.id} {...(sizing[cell.column.id] ? { width: sizing[cell.column.id] } : {})}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </DraggableCell>
-                      ))}
-                    </SortableContext>
+                    {row.getVisibleCells().map((cell) => (
+                      <BodyCell key={cell.id} {...(sizing[cell.column.id] ? { width: sizing[cell.column.id] } : {})}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </BodyCell>
+                    ))}
                     {hasActions && (
                       // biome-ignore lint/a11y/useKeyWithClickEvents: гасит всплытие клика по строке, сами действия — кнопки
                       <td className={`${TD} whitespace-nowrap text-right`} onClick={(e) => e.stopPropagation()}>
