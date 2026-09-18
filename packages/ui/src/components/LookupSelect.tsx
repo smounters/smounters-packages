@@ -11,6 +11,8 @@ export interface LookupSelectProps<T> {
   placeholder?: string | undefined;
   isDisabled?: boolean | undefined;
   ariaLabel?: string | undefined;
+  /** Ссылка на видимую подпись рядом — этот проп подставляет `Field`. */
+  "aria-labelledby"?: string | undefined;
   className?: string | undefined;
 }
 
@@ -28,6 +30,7 @@ export function LookupSelect<T>({
   placeholder,
   isDisabled,
   ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
   className,
 }: LookupSelectProps<T>) {
   const options = [
@@ -41,6 +44,7 @@ export function LookupSelect<T>({
       onChange={onChange}
       isDisabled={isDisabled}
       ariaLabel={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
       className={className}
     />
   );

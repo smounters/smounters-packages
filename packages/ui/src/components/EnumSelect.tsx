@@ -25,6 +25,12 @@ export interface EnumSelectProps<T extends string | number> {
   onChange: (value: T) => void;
   /** Подпись для screen reader'а, если рядом нет видимого лейбла. */
   ariaLabel?: string | undefined;
+  /**
+   * Ссылка на видимую подпись рядом. Именно этот проп подставляет `Field`, и принимать его надо ПОД
+   * ЭТИМ именем: компонент чужие атрибуты не разливает, поэтому без явного объявления подпись до
+   * поля не доезжала и оно оставалось безымянным.
+   */
+  "aria-labelledby"?: string | undefined;
   placeholder?: string | undefined;
   isDisabled?: boolean | undefined;
   className?: string | undefined;
@@ -43,6 +49,7 @@ export function EnumSelect<T extends string | number>({
   options,
   onChange,
   ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
   placeholder,
   isDisabled,
   className,
@@ -58,6 +65,7 @@ export function EnumSelect<T extends string | number>({
       selectedKey={String(value)}
       onSelectionChange={onSelectionChange}
       {...(ariaLabel ? { "aria-label": ariaLabel } : {})}
+      {...(ariaLabelledBy ? { "aria-labelledby": ariaLabelledBy } : {})}
       {...(isDisabled !== undefined ? { isDisabled } : {})}
       {...(className ? { className } : {})}
     >
