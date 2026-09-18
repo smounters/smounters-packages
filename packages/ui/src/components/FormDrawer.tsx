@@ -40,6 +40,15 @@ export const SELECT_CLASS =
 const LABELLABLE = new Set(["input", "select", "textarea"]);
 
 /**
+ * Можно ли подставить `id` ребёнку и связать с ним подпись.
+ *
+ * Голый тег — только если он вообще умеет быть подписанным. Компонент — да: внутри почти всегда
+ * поле HeroUI, и оно `id` пробрасывает. Ограничение одними голыми тегами было проверено живьём и
+ * не сработало: поля фильтра заказов и настроек шлюза лежат в `Field` через <Input>, то есть через
+ * компонент, и остались без имени.
+ */
+
+/**
  * Строка формы.
  *
  * Обёртка — <div>, а не <label>: внутрь кладут и составные контролы (пикеры со своим выпадающим
@@ -58,8 +67,7 @@ export function Field({ label, hint, children }: { label: string; hint?: string 
   const bindable =
     isValidElement<{ id?: string }>(children) &&
     children.props.id === undefined &&
-    typeof children.type === "string" &&
-    LABELLABLE.has(children.type);
+    (typeof children.type === "string" ? LABELLABLE.has(children.type) : true);
 
   return (
     <div className="flex flex-col gap-1 text-sm">
