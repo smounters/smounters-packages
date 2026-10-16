@@ -1,5 +1,4 @@
 import type { LoggerOptions, LogLevel, LogTransport } from "../types.js";
-import { LOGGER_TOKEN } from "./tokens.js";
 import { consoleTransport, levelIndex } from "./log-transport.js";
 
 /**
@@ -80,5 +79,3 @@ export type AppLogger = Logger;
 export function createLogger(options?: LoggerOptions): AppLogger {
   return new Logger(options);
 }
-
-export { LOGGER_TOKEN } from "./tokens.js";

@@ -1,5 +1,5 @@
-import "reflect-metadata";
 import { AsyncLocalStorage } from "node:async_hooks";
+import "reflect-metadata";
 import { container, type DependencyContainer, Lifecycle } from "tsyringe";
 import type { output, ZodType } from "zod";
 import { MODULE_KEY, WS_GATEWAY_KEY } from "../core/tokens.js";
@@ -24,11 +24,10 @@ import type {
   PipeLike,
   Provider,
 } from "../types.js";
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from "./tokens.js";
-import { CONFIG_TOKEN } from "./config.js";
-import { type AppLogger, createLogger, LOGGER_TOKEN } from "./logger.js";
 import { pushUniqueEnhancer } from "./enhancers.js";
+import { type AppLogger, createLogger } from "./logger.js";
 import { Reflector } from "./reflector.js";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE, CONFIG_TOKEN, LOGGER_TOKEN } from "./tokens.js";
 
 type ModuleLoadKey = Constructor | string;
 
