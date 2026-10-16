@@ -78,11 +78,7 @@ export interface ExistingProvider<T = unknown> {
 }
 
 export type Provider<T = unknown> =
-  | Constructor<T>
-  | ClassProvider<T>
-  | ValueProvider<T>
-  | FactoryProvider<T>
-  | ExistingProvider<T>;
+  Constructor<T> | ClassProvider<T> | ValueProvider<T> | FactoryProvider<T> | ExistingProvider<T>;
 
 interface BaseModuleMeta {
   providers?: Provider[];

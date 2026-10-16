@@ -1,11 +1,11 @@
 import "reflect-metadata";
+
 import type { Constructor, OnModuleInit } from "@smounters/core/core";
 import { Inject, Injectable, Module } from "@smounters/core/decorators";
 import type { DependencyContainer } from "tsyringe";
 
 import { EventService } from "./event.service.js";
-
-const EVENT_LISTENERS_TOKEN = Symbol.for("imperium:events:listeners");
+import { EVENTS_CONTAINER, EVENTS_LISTENERS_TOKEN } from "./event.tokens.js";
 
 export interface EventModuleOptions {
   /**
@@ -19,8 +19,8 @@ export interface EventModuleOptions {
 class EventBootstrap implements OnModuleInit {
   constructor(
     private readonly eventService: EventService,
-    @Inject(EVENT_LISTENERS_TOKEN) private readonly listeners: Constructor[],
-    @Inject("events:container") private readonly container: DependencyContainer,
+    @Inject(EVENTS_LISTENERS_TOKEN) private readonly listeners: Constructor[],
+    @Inject(EVENTS_CONTAINER) private readonly container: DependencyContainer,
   ) {}
 
   onModuleInit(): void {
@@ -42,7 +42,7 @@ export class EventModule {
         EventService,
         EventBootstrap,
         ...eventListeners,
-        { provide: EVENT_LISTENERS_TOKEN, useValue: eventListeners },
+        { provide: EVENTS_LISTENERS_TOKEN, useValue: eventListeners },
         {
           provide: "events:container",
           useFactory: (container: DependencyContainer) => container,

@@ -1,4 +1,4 @@
-import type { ImperiumLoggerOptions, LogEntry, LogLevel, LogTransport } from "../types.js";
+import type { LogEntry, LoggerOptions, LogLevel, LogTransport } from "../types.js";
 import { consoleTransport, levelIndex } from "./log-transport.js";
 
 /**
@@ -10,7 +10,7 @@ export class ImperiumLogger {
   private readonly minIdx: number;
   private readonly name?: string;
 
-  constructor(options: ImperiumLoggerOptions = {}) {
+  constructor(options: LoggerOptions = {}) {
     this.transports = options.transports ?? [consoleTransport()];
     this.minIdx = levelIndex(options.minLevel ?? "silly");
     this.name = options.name;

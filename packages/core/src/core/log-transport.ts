@@ -1,4 +1,4 @@
-import type { ImperiumLoggerOptions, LogEntry, LogLevel, LogTransport, TslogOptions } from "../types.js";
+import type { LogEntry, LoggerOptions, LogLevel, LogTransport, TslogOptions } from "../types.js";
 
 export const LOG_LEVELS: LogLevel[] = ["silly", "trace", "debug", "info", "warn", "error", "fatal"];
 
@@ -6,7 +6,7 @@ export function levelIndex(level: LogLevel): number {
   return LOG_LEVELS.indexOf(level);
 }
 
-export function isImperiumLoggerOptions(options: unknown): options is ImperiumLoggerOptions {
+export function isImperiumLoggerOptions(options: unknown): options is LoggerOptions {
   if (!options || typeof options !== "object") {
     return false;
   }

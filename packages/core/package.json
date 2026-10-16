@@ -2,32 +2,64 @@
   "name": "@smounters/core",
   "version": "2.0.1",
   "description": "NestJS-like modular DI container with unified HTTP + Connect RPC server for TypeScript",
-  "keywords": ["di", "dependency-injection", "fastify", "connectrpc", "typescript"],
+  "keywords": [
+    "di",
+    "dependency-injection",
+    "fastify",
+    "connectrpc",
+    "typescript"
+  ],
   "license": "MIT",
   "type": "module",
   "exports": {
-    "./core": { "types": "./dist/core/index.d.ts", "import": "./dist/core/index.js" },
-    "./decorators": { "types": "./dist/decorators/index.d.ts", "import": "./dist/decorators/index.js" },
-    "./pipes": { "types": "./dist/pipes/index.d.ts", "import": "./dist/pipes/index.js" },
-    "./services": { "types": "./dist/services/index.d.ts", "import": "./dist/services/index.js" },
-    "./validation": { "types": "./dist/validation/index.d.ts", "import": "./dist/validation/index.js" },
-    "./ws": { "types": "./dist/ws/index.d.ts", "import": "./dist/ws/index.js" }
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
+    },
+    "./decorators": {
+      "types": "./dist/decorators/index.d.ts",
+      "import": "./dist/decorators/index.js"
+    },
+    "./pipes": {
+      "types": "./dist/pipes/index.d.ts",
+      "import": "./dist/pipes/index.js"
+    },
+    "./services": {
+      "types": "./dist/services/index.d.ts",
+      "import": "./dist/services/index.js"
+    },
+    "./validation": {
+      "types": "./dist/validation/index.d.ts",
+      "import": "./dist/validation/index.js"
+    },
+    "./ws": {
+      "types": "./dist/ws/index.d.ts",
+      "import": "./dist/ws/index.js"
+    }
   },
-  "files": ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
-  "publishConfig": { "access": "public" },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/smounters/smounters-packages.git",
     "directory": "packages/core"
   },
   "homepage": "https://smounters.github.io/smounters-packages/",
-  "engines": { "node": ">=20.0.0" },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
-    "test": "vitest run",
     "clean": "rm -rf dist",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
@@ -47,6 +79,8 @@
     "zod": "^4.3.6"
   },
   "peerDependenciesMeta": {
-    "@fastify/websocket": { "optional": true }
+    "@fastify/websocket": {
+      "optional": true
+    }
   }
 }

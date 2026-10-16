@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { inject, injectAll, injectable, Lifecycle } from "tsyringe";
+import { inject, injectable, injectAll, Lifecycle } from "tsyringe";
 import type { InjectionToken, ModuleMeta } from "../types.js";
 
 export const MODULE_KEY = Symbol.for("imperium:module");

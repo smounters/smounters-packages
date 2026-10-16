@@ -2,7 +2,12 @@
   "name": "@smounters/cron",
   "version": "2.0.1",
   "description": "Cron scheduling for @smounters/core",
-  "keywords": ["cron", "scheduler", "imperium", "nestjs-like", "typescript"],
+  "keywords": [
+    "cron",
+    "scheduler",
+    "nestjs-like",
+    "typescript"
+  ],
   "license": "MIT",
   "type": "module",
   "exports": {
@@ -11,7 +16,12 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "publishConfig": {
     "access": "public"
   },
@@ -29,7 +39,6 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
-    "test": "vitest run",
     "clean": "rm -rf dist",
     "prepack": "pnpm run clean && pnpm run build",
     "prepublishOnly": "pnpm run clean && pnpm run build"

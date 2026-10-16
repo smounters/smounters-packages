@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { injectable } from "tsyringe";
 
 import type { EventHandlerMeta } from "./event.decorators.js";
-import { ON_EVENT_KEY } from "./event.decorators.js";
+import { EVENT_HANDLERS_TOKEN, LOGGER_PREFIX } from "./event.tokens.js";
 
 interface RegisteredHandler {
   pattern: string;
@@ -39,7 +39,7 @@ export class EventService {
    */
   registerListener(instance: object, listenerName: string): void {
     const constructor = instance.constructor;
-    const metas: EventHandlerMeta[] = Reflect.getMetadata(ON_EVENT_KEY, constructor) ?? [];
+    const metas: EventHandlerMeta[] = Reflect.getMetadata(EVENT_HANDLERS_TOKEN, constructor) ?? [];
 
     for (const meta of metas) {
       const method = (instance as Record<string, unknown>)[meta.methodName];
@@ -62,7 +62,7 @@ export class EventService {
    * Check if a class has any @OnEvent() decorated methods.
    */
   static hasEventHandlers(target: Function): boolean {
-    const metas: EventHandlerMeta[] | undefined = Reflect.getMetadata(ON_EVENT_KEY, target);
+    const metas: EventHandlerMeta[] | undefined = Reflect.getMetadata(EVENT_HANDLERS_TOKEN, target);
     return (metas?.length ?? 0) > 0;
   }
 
@@ -86,7 +86,7 @@ export class EventService {
       const handler = matching[i];
       if (result?.status === "rejected" && handler) {
         this.logger.error(
-          `[imperium-events] Handler ${handler.listenerName}.${handler.methodName} ` + `failed for event "${event}":`,
+          `${LOGGER_PREFIX} Handler ${handler.listenerName}.${handler.methodName} ` + `failed for event "${event}":`,
           result.reason,
         );
         this.onError?.(result.reason, {

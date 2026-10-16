@@ -1,6 +1,5 @@
 import "reflect-metadata";
-
-export const ON_EVENT_KEY = Symbol.for("imperium:events:handlers");
+import { EVENTS_HANDLERS_TOKEN } from "./event.tokens";
 
 export interface EventHandlerMeta {
   pattern: string;
@@ -16,13 +15,13 @@ export interface EventHandlerMeta {
  */
 export function OnEvent(pattern: string): MethodDecorator {
   return (target, propertyKey) => {
-    const existing: EventHandlerMeta[] = Reflect.getMetadata(ON_EVENT_KEY, target.constructor) ?? [];
+    const existing: EventHandlerMeta[] = Reflect.getMetadata(EVENTS_HANDLERS_TOKEN, target.constructor) ?? [];
 
     existing.push({
       pattern,
       methodName: propertyKey as string,
     });
 
-    Reflect.defineMetadata(ON_EVENT_KEY, existing, target.constructor);
+    Reflect.defineMetadata(EVENTS_HANDLERS_TOKEN, existing, target.constructor);
   };
 }
