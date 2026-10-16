@@ -1,8 +1,7 @@
 import "reflect-metadata";
 import type { PipeLike } from "../types.js";
 import { appendArrayMetadata } from "./metadata.decorators.js";
-
-export const PIPES_KEY = Symbol.for("imperium:pipes");
+import { PIPES_KEY } from "../core/tokens.js";
 
 export function UsePipes(...pipes: PipeLike[]): ClassDecorator & MethodDecorator {
   return (target: object, propertyKey?: string | symbol) => {

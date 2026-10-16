@@ -1,10 +1,8 @@
 import "reflect-metadata";
 import type { WsGatewayMeta, WsHandlerMeta, WsParamMeta, WsParamSource } from "../ws/types.js";
 import { Injectable } from "./di.decorators.js";
-
-export const WS_GATEWAY_KEY = Symbol.for("imperium:ws:gateway");
-export const WS_HANDLERS_KEY = Symbol.for("imperium:ws:handlers");
-export const WS_PARAMS_KEY = Symbol.for("imperium:ws:params");
+import { appendArrayMetadata } from "./metadata.decorators.js";
+import { WS_GATEWAY_KEY, WS_HANDLERS_KEY, WS_PARAMS_KEY } from "../core/tokens.js";
 
 export function WsGateway(path = "/ws"): ClassDecorator {
   return (target) => {
@@ -22,25 +20,8 @@ export function WsHandler(messageType: string): MethodDecorator {
   };
 }
 
-function getMetaTarget(target: object, propertyKey?: string | symbol): object {
-  if (propertyKey === undefined) {
-    return target;
-  }
-
-  const value = (target as Record<string | symbol, unknown>)[propertyKey];
-
-  if (typeof value !== "object" && typeof value !== "function") {
-    throw new Error("Decorator target is not an object");
-  }
-
-  return value!;
-}
-
 function setParamMeta(target: object, propertyKey: string | symbol | undefined, meta: WsParamMeta): void {
-  const metaTarget = getMetaTarget(target, propertyKey);
-  const existing = Reflect.getMetadata(WS_PARAMS_KEY, metaTarget) as WsParamMeta[] | undefined;
-  const next: WsParamMeta[] = existing ? [...existing, meta] : [meta];
-  Reflect.defineMetadata(WS_PARAMS_KEY, next, metaTarget);
+  appendArrayMetadata(WS_PARAMS_KEY, [meta], target, propertyKey);
 }
 
 function wsParamDecorator(source: WsParamSource): ParameterDecorator {

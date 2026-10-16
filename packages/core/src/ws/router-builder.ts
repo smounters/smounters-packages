@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import "reflect-metadata";
 
 import type { AppContainer } from "../core/container.js";
-import { WS_GATEWAY_KEY } from "../decorators/ws.decorators.js";
+import { WS_GATEWAY_KEY } from "../core/tokens.js";
 import { handleWsConnection } from "./adapter.js";
 import type { WsGatewayMeta } from "./types.js";
 

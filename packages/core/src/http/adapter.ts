@@ -1,10 +1,10 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { AppContainer } from "../core/container.js";
 import { ForbiddenException, toHttpError } from "../core/errors.js";
-import type { HttpParamMeta } from "../core/types.js";
-import { CATCH_EXCEPTIONS_KEY } from "../decorators/filters.decorators.js";
-import { PARAMS_KEY } from "../decorators/http.decorators.js";
+import type { HttpParamMeta } from "../types.js";
+import { PARAMS_KEY } from "../core/tokens.js";
 import type { BaseContext, Constructor, ExceptionFilter, Guard, Interceptor, PipeTransform } from "../types.js";
+import { getPayloadValue, resolveEnhancer, canHandleException } from "../core/enhancers.js";
 import {
   collectFiltersForHttp,
   collectGuardsForHttp,
@@ -30,14 +30,6 @@ function reportHttpError(app: AppContainer, details: Record<string, unknown>, er
   });
 }
 
-function resolveEnhancer<T>(scope: RequestScope, enhancer: Constructor<T> | T): T {
-  if (typeof enhancer === "function") {
-    return scope.resolve(enhancer as Constructor<T>);
-  }
-
-  return enhancer;
-}
-
 function getRequestScope(req: FastifyRequest, app: AppContainer, controller: Constructor): RequestScope {
   const request = req as RequestWithScope;
 
@@ -49,18 +41,6 @@ function getRequestScope(req: FastifyRequest, app: AppContainer, controller: Con
   request.diScope = scope;
 
   return scope;
-}
-
-function getPayloadValue(payload: unknown, key?: string): unknown {
-  if (!key) {
-    return payload;
-  }
-
-  if (!payload || typeof payload !== "object") {
-    return undefined;
-  }
-
-  return (payload as Record<string, unknown>)[key];
 }
 
 function buildArgs(req: FastifyRequest, reply: FastifyReply, handler: Function): HttpArgsBuildResult {
@@ -105,20 +85,6 @@ function buildArgs(req: FastifyRequest, reply: FastifyReply, handler: Function):
   }
 
   return { args, metasByIndex };
-}
-
-function canHandleException(error: unknown, filter: ExceptionFilter): boolean {
-  const exceptions = Reflect.getMetadata(CATCH_EXCEPTIONS_KEY, filter.constructor) as Constructor[] | undefined;
-
-  if (!exceptions || exceptions.length === 0) {
-    return true;
-  }
-
-  if (!(error instanceof Error)) {
-    return false;
-  }
-
-  return exceptions.some((ExceptionType) => error instanceof ExceptionType);
 }
 
 async function runHttpFilters(

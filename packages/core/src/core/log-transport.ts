@@ -1,4 +1,4 @@
-import type { LogEntry, LoggerOptions, LogLevel, LogTransport, TslogOptions } from "../types.js";
+import type { LoggerOptions, LogEntry, LogLevel, LogTransport } from "../types.js";
 
 export const LOG_LEVELS: LogLevel[] = ["silly", "trace", "debug", "info", "warn", "error", "fatal"];
 
@@ -6,30 +6,24 @@ export function levelIndex(level: LogLevel): number {
   return LOG_LEVELS.indexOf(level);
 }
 
-export function isImperiumLoggerOptions(options: unknown): options is LoggerOptions {
+export function isLoggerOptions(options: unknown): options is LoggerOptions {
   if (!options || typeof options !== "object") {
     return false;
   }
 
   const obj = options as Record<string, unknown>;
 
-  // ImperiumLoggerOptions has 'transports' or 'minLevel' as LogLevel string
   if (Array.isArray(obj.transports)) {
     return true;
   }
 
   if (typeof obj.minLevel === "string" && LOG_LEVELS.includes(obj.minLevel as LogLevel)) {
-    // Could be tslog too (it also has minLevel as number), but string minLevel is ours
     if (typeof obj.type !== "string") {
       return true;
     }
   }
 
   return false;
-}
-
-export function isTslogOptions(options: unknown): options is TslogOptions {
-  return !isImperiumLoggerOptions(options);
 }
 
 function formatTimestamp(date: Date): string {

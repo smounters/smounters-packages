@@ -1,8 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import "reflect-metadata";
 import type { AppContainer } from "../core/container.js";
-import type { HttpRouteMeta } from "../core/types.js";
-import { HTTP_CONTROLLER_KEY, HTTP_ROUTES_KEY } from "../decorators/http.decorators.js";
+import type { HttpRouteMeta } from "../types.js";
+import { HTTP_CONTROLLER_KEY, HTTP_ROUTES_KEY } from "../core/tokens.js";
 import type { Constructor } from "../types.js";
 import { createHttpHandler } from "./adapter.js";
 

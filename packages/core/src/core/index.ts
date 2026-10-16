@@ -1,5 +1,5 @@
 export type * from "../types.js";
-export { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from "./app-tokens.js";
+export { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from "./tokens.js";
 export { Application } from "./application.js";
 export {
   BadRequestException,
@@ -9,6 +9,6 @@ export {
   NotFoundException,
   UnauthorizedException,
 } from "./errors.js";
-export { ImperiumLogger } from "./imperium-logger.js";
+export { Logger } from "./logger.js";
 export { consoleTransport } from "./log-transport.js";
 export { Reflector } from "./reflector.js";

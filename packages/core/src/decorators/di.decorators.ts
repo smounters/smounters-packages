@@ -1,8 +1,7 @@
 import "reflect-metadata";
 import { inject, injectable, injectAll, Lifecycle } from "tsyringe";
 import type { InjectionToken, ModuleMeta } from "../types.js";
-
-export const MODULE_KEY = Symbol.for("imperium:module");
+import { MODULE_KEY } from "../core/tokens.js";
 
 export function Module(meta: ModuleMeta): ClassDecorator {
   return (target) => {

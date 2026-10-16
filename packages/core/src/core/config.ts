@@ -1,1 +1,1 @@
-export const CONFIG_TOKEN = Symbol.for("app:config");
+export { CONFIG_TOKEN } from "./tokens.js";

@@ -2,8 +2,7 @@ import "reflect-metadata";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { container, type DependencyContainer, Lifecycle } from "tsyringe";
 import type { output, ZodType } from "zod";
-import { MODULE_KEY } from "../decorators/di.decorators.js";
-import { WS_GATEWAY_KEY } from "../decorators/ws.decorators.js";
+import { MODULE_KEY, WS_GATEWAY_KEY } from "../core/tokens.js";
 import { ConfigService, LoggerService } from "../services/index.js";
 import type {
   BeforeApplicationShutdown,
@@ -25,9 +24,10 @@ import type {
   PipeLike,
   Provider,
 } from "../types.js";
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from "./app-tokens.js";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from "./tokens.js";
 import { CONFIG_TOKEN } from "./config.js";
 import { type AppLogger, createLogger, LOGGER_TOKEN } from "./logger.js";
+import { pushUniqueEnhancer } from "./enhancers.js";
 import { Reflector } from "./reflector.js";
 
 type ModuleLoadKey = Constructor | string;
@@ -36,7 +36,7 @@ type DynamicModuleMeta = Omit<DynamicModule, "module" | "id">;
 
 interface ResolvedModuleMeta {
   providers: Provider[];
-  controllers: Constructor[];
+  rpcControllers: Constructor[];
   httpControllers: Constructor[];
   imports: ModuleImport[];
   exports: InjectionToken[];
@@ -90,31 +90,6 @@ function tokenToString(token: InjectionToken): string {
   }
 
   return String(token);
-}
-
-function enhancerKey(value: unknown): unknown {
-  if (typeof value === "function") {
-    return value;
-  }
-
-  if (value && typeof value === "object") {
-    const maybeCtor = (value as { constructor?: unknown }).constructor;
-    if (maybeCtor && maybeCtor !== Object) {
-      return maybeCtor;
-    }
-  }
-
-  return value;
-}
-
-function pushUniqueEnhancer<T>(values: T[], value: T): T[] {
-  const key = enhancerKey(value);
-
-  if (values.some((current) => enhancerKey(current) === key)) {
-    return values;
-  }
-
-  return [...values, value];
 }
 
 function isAppEnhancerToken(token: InjectionToken): boolean {
@@ -227,7 +202,7 @@ export class AppContainer {
   private readonly requestContextStorage = new AsyncLocalStorage<RequestResolutionContext>();
 
   private rootModuleRef: ModuleRef | null = null;
-  private controllers: Constructor[] = [];
+  private rpcControllers: Constructor[] = [];
   private httpControllers: Constructor[] = [];
   private wsGateways: Constructor[] = [];
   private lifecycleInstances: unknown[] | null = null;
@@ -315,7 +290,7 @@ export class AppContainer {
   private mergeModuleMetadata(staticMeta: ModuleMeta, dynamicMeta?: DynamicModuleMeta): ResolvedModuleMeta {
     return {
       providers: [...(staticMeta.providers ?? []), ...(dynamicMeta?.providers ?? [])],
-      controllers: [...(staticMeta.controllers ?? []), ...(dynamicMeta?.controllers ?? [])],
+      rpcControllers: [...(staticMeta.rpcControllers ?? []), ...(dynamicMeta?.rpcControllers ?? [])],
       httpControllers: [...(staticMeta.httpControllers ?? []), ...(dynamicMeta?.httpControllers ?? [])],
       imports: [...(staticMeta.imports ?? []), ...(dynamicMeta?.imports ?? [])],
       exports: [...(staticMeta.exports ?? []), ...(dynamicMeta?.exports ?? [])],
@@ -608,7 +583,7 @@ export class AppContainer {
         this.registerProvider(moduleRef, provider);
       }
 
-      for (const ctrl of meta.controllers) {
+      for (const ctrl of meta.rpcControllers) {
         if (this.rpcControllerSet.has(ctrl)) {
           continue;
         }
@@ -617,7 +592,7 @@ export class AppContainer {
         this.addLifecycleTarget(moduleRef.container, ctrl);
         this.rpcControllerSet.add(ctrl);
         this.rpcControllerModules.set(ctrl, moduleRef);
-        this.controllers.push(ctrl);
+        this.rpcControllers.push(ctrl);
       }
 
       for (const ctrl of meta.httpControllers) {
@@ -769,7 +744,7 @@ export class AppContainer {
   }
 
   getConfig<TConfig extends Record<string, unknown> = Record<string, unknown>>(): Readonly<TConfig> {
-    return this.resolve(CONFIG_TOKEN);
+    return this.resolve(CONFIG_TOKEN) as Readonly<TConfig>;
   }
 
   async init(): Promise<void> {
@@ -932,8 +907,8 @@ export class AppContainer {
     return scope;
   }
 
-  getControllers(): Constructor[] {
-    return [...this.controllers];
+  getRpcControllers(): Constructor[] {
+    return [...this.rpcControllers];
   }
 
   getHttpControllers(): Constructor[] {

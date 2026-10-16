@@ -4,8 +4,7 @@ import "reflect-metadata";
 
 import type { AppContainer } from "../core/container.js";
 import { Reflector } from "../core/reflector.js";
-import { GUARDS_KEY } from "../decorators/guards.decorators.js";
-import { WS_HANDLERS_KEY, WS_PARAMS_KEY } from "../decorators/ws.decorators.js";
+import { GUARDS_KEY, WS_HANDLERS_KEY, WS_PARAMS_KEY } from "../core/tokens.js";
 import type { BaseContext, Constructor, Guard, GuardLike, WsArgumentsHost } from "../types.js";
 import type { WsGatewayLifecycle, WsHandlerMeta, WsParamMeta } from "./types.js";
 

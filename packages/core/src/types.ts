@@ -1,5 +1,5 @@
+import type { ConnectRouter } from "@connectrpc/connect";
 import type { FastifyReply, FastifyRequest, FastifyServerOptions } from "fastify";
-import type { ISettingsParam } from "tslog";
 import type { DependencyContainer, RegistrationOptions, InjectionToken as TsyringeInjectionToken } from "tsyringe";
 import type { ZodType } from "zod";
 
@@ -25,18 +25,12 @@ export interface LogTransport {
   log(entry: LogEntry): void;
 }
 
-/** Native imperium logger options (transport-based) */
-export interface ImperiumLoggerOptions {
+/** Logger options (transport-based, native imperium logger) */
+export interface LoggerOptions {
   name?: string;
   minLevel?: LogLevel;
   transports?: LogTransport[];
 }
-
-/** Legacy tslog options — still supported */
-export type TslogOptions = ISettingsParam<Record<string, unknown>>;
-
-/** Accepts either native imperium options or tslog settings */
-export type LoggerOptions = ImperiumLoggerOptions | TslogOptions;
 
 // --- Error Reporting ---
 
@@ -82,7 +76,7 @@ export type Provider<T = unknown> =
 
 interface BaseModuleMeta {
   providers?: Provider[];
-  controllers?: Constructor[];
+  rpcControllers?: Constructor[];
   httpControllers?: Constructor[];
   imports?: ModuleImport[];
   exports?: InjectionToken[];
@@ -247,4 +241,38 @@ export interface ServerOptions {
   loggerOptions?: LoggerOptions;
   onError?: OnErrorCallback;
   config?: ConfigServiceOptions;
+}
+
+// --- HTTP / RPC route metadata (moved here from core/types.ts) ---
+
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+export interface HttpRouteMeta {
+  method: HttpMethod;
+  path: string;
+  handlerName: string;
+}
+
+export type HttpParamSource = "body" | "query" | "param" | "header" | "req" | "res";
+
+export interface HttpParamMeta {
+  index: number;
+  source: HttpParamSource;
+  key?: string;
+}
+
+export type RpcParamSource = "data" | "context" | "headers" | "header" | "abort_signal";
+
+export interface RpcParamMeta {
+  index: number;
+  source: RpcParamSource;
+  key?: string;
+}
+
+export type RpcServiceDescriptor = Parameters<ConnectRouter["service"]>[0];
+export type RpcMethodDescriptor = Parameters<ConnectRouter["rpc"]>[0];
+
+export interface RpcMethodMeta {
+  method: RpcMethodDescriptor;
+  handlerName: string;
 }

@@ -4,8 +4,7 @@ import { fastifyConnectPlugin } from "@connectrpc/connect-fastify";
 import fastifyCors from "@fastify/cors";
 import Fastify, { type FastifyInstance, type FastifyRequest } from "fastify";
 
-import { HTTP_ROUTES_KEY } from "../decorators/http.decorators.js";
-import { RPC_METHODS_KEY, RPC_SERVICE_KEY } from "../decorators/rpc.decorators.js";
+import { HTTP_ROUTES_KEY, RPC_METHODS_KEY, RPC_SERVICE_KEY } from "../core/tokens.js";
 import { registerHttpRoutes } from "../http/index.js";
 import { buildConnectRoutes } from "../rpc/index.js";
 import type { CorsOptions, HealthCheck, HealthCheckResult, ServerOptions } from "../types.js";
@@ -14,7 +13,6 @@ import { AppContainer } from "./container.js";
 
 type RequestScope = ReturnType<AppContainer["createRequestScope"]>;
 type RequestWithScope = FastifyRequest & { diScope?: RequestScope; requestStartAt?: number };
-type LegacyServerOptions = ServerOptions & { di: AppContainer };
 type CorsPluginOptions = Omit<CorsOptions, "enabled">;
 type AppLogger = ReturnType<AppContainer["getLogger"]>;
 
@@ -69,7 +67,7 @@ function hasRegisteredHttpHandlers(di: AppContainer): boolean {
 }
 
 function hasRegisteredRpcHandlers(di: AppContainer): boolean {
-  for (const controller of di.getControllers()) {
+  for (const controller of di.getRpcControllers()) {
     const service = Reflect.getMetadata(RPC_SERVICE_KEY, controller);
     if (!service) {
       continue;
@@ -198,15 +196,12 @@ async function runHealthCheck(
   }
 }
 
-export function startServer(di: AppContainer, options: ServerOptions, hooks?: HookEntry[]): Promise<FastifyInstance>;
-export function startServer(options: LegacyServerOptions): Promise<FastifyInstance>;
 export async function startServer(
-  diOrOptions: AppContainer | LegacyServerOptions,
-  options?: ServerOptions,
+  di: AppContainer,
+  options: ServerOptions,
   hooks?: HookEntry[],
 ): Promise<FastifyInstance> {
-  const di = diOrOptions instanceof AppContainer ? diOrOptions : diOrOptions.di;
-  const serverOptions = diOrOptions instanceof AppContainer ? options : diOrOptions;
+  const serverOptions = options;
 
   if (!serverOptions) {
     throw new Error("Server options are required");

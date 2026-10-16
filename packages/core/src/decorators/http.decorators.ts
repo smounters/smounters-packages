@@ -1,10 +1,8 @@
 import "reflect-metadata";
-import type { HttpMethod, HttpParamMeta, HttpParamSource, HttpRouteMeta } from "../core/types.js";
+import type { HttpMethod, HttpParamMeta, HttpParamSource, HttpRouteMeta } from "../types.js";
 import { Injectable } from "./di.decorators.js";
-
-export const HTTP_ROUTES_KEY = Symbol.for("imperium:http:routes");
-export const HTTP_CONTROLLER_KEY = Symbol.for("imperium:http:controller");
-export const PARAMS_KEY = Symbol.for("imperium:http:params");
+import { appendArrayMetadata } from "./metadata.decorators.js";
+import { HTTP_CONTROLLER_KEY, HTTP_ROUTES_KEY, PARAMS_KEY } from "../core/tokens.js";
 
 export function HttpController(prefix = ""): ClassDecorator {
   return (target) => {
@@ -35,28 +33,8 @@ export const Put = methodDecorator("PUT");
 export const Patch = methodDecorator("PATCH");
 export const Delete = methodDecorator("DELETE");
 
-function getMetaTarget(target: object, propertyKey?: string | symbol): object {
-  if (propertyKey === undefined) {
-    return target;
-  }
-
-  const value = (target as Record<string | symbol, unknown>)[propertyKey];
-
-  if (typeof value !== "object" && typeof value !== "function") {
-    throw new Error("Decorator target is not an object");
-  }
-
-  return value!;
-}
-
 function setParamMeta(target: object, propertyKey: string | symbol | undefined, meta: HttpParamMeta): void {
-  const metaTarget = getMetaTarget(target, propertyKey);
-
-  const existing = Reflect.getMetadata(PARAMS_KEY, metaTarget) as HttpParamMeta[] | undefined;
-
-  const next: HttpParamMeta[] = existing ? [...existing, meta] : [meta];
-
-  Reflect.defineMetadata(PARAMS_KEY, next, metaTarget);
+  appendArrayMetadata(PARAMS_KEY, [meta], target, propertyKey);
 }
 
 function paramDecorator(source: HttpParamSource, key?: string): ParameterDecorator {
