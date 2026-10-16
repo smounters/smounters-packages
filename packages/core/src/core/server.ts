@@ -4,7 +4,7 @@ import { fastifyConnectPlugin } from "@connectrpc/connect-fastify";
 import fastifyCors from "@fastify/cors";
 import Fastify, { type FastifyInstance, type FastifyRequest } from "fastify";
 
-import { HTTP_ROUTES_KEY, RPC_METHODS_KEY, RPC_SERVICE_KEY } from "../core/tokens.js";
+import { HTTP_ROUTES_KEY, RPC_METHODS_KEY, RPC_SERVICES_KEY } from "../core/tokens.js";
 import { registerHttpRoutes } from "../http/index.js";
 import { buildConnectRoutes } from "../rpc/index.js";
 import type { CorsOptions, HealthCheck, HealthCheckResult, ServerOptions } from "../types.js";
@@ -68,7 +68,7 @@ function hasRegisteredHttpHandlers(di: AppContainer): boolean {
 
 function hasRegisteredRpcHandlers(di: AppContainer): boolean {
   for (const controller of di.getRpcControllers()) {
-    const service = Reflect.getMetadata(RPC_SERVICE_KEY, controller);
+    const service = Reflect.getMetadata(RPC_SERVICES_KEY, controller);
     if (!service) {
       continue;
     }

@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import { RPC_METHODS_KEY, RPC_PARAMS_KEY, RPC_SERVICES_KEY } from "../core/tokens.js";
 import type {
   RpcMethodDescriptor,
   RpcMethodMeta,
@@ -8,12 +9,11 @@ import type {
 } from "../types.js";
 import { Injectable } from "./di.decorators.js";
 import { appendArrayMetadata } from "./metadata.decorators.js";
-import { RPC_METHODS_KEY, RPC_PARAMS_KEY, RPC_SERVICE_KEY } from "../core/tokens.js";
 
 export function RpcService(service: RpcServiceDescriptor): ClassDecorator {
   return (target) => {
     Injectable()(target as never);
-    Reflect.defineMetadata(RPC_SERVICE_KEY, service, target);
+    Reflect.defineMetadata(RPC_SERVICES_KEY, service, target);
   };
 }
 

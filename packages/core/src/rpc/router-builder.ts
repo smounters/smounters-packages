@@ -2,9 +2,8 @@ import type { ConnectRouter } from "@connectrpc/connect";
 import "reflect-metadata";
 
 import type { AppContainer } from "../core/container.js";
-import type { RpcMethodMeta } from "../types.js";
-import { RPC_METHODS_KEY, RPC_SERVICE_KEY } from "../core/tokens.js";
-import type { Constructor } from "../types.js";
+import { RPC_METHODS_KEY, RPC_SERVICES_KEY } from "../core/tokens.js";
+import type { Constructor, RpcMethodMeta } from "../types.js";
 import { createRpcHandler } from "./adapter.js";
 import { createStreamingRpcHandler } from "./streaming-adapter.js";
 
@@ -16,7 +15,7 @@ export function buildConnectRoutes(di: AppContainer) {
   return (router: ConnectRouter): void => {
     for (const ctrl of di.getRpcControllers()) {
       const controller = ctrl as Constructor<RpcControllerShape>;
-      const service = Reflect.getMetadata(RPC_SERVICE_KEY, controller);
+      const service = Reflect.getMetadata(RPC_SERVICES_KEY, controller);
 
       if (!service) {
         continue;
