@@ -1,4 +1,4 @@
-import { CONFIG_TOKEN } from "../core/config.js";
+import { CONFIG_TOKEN } from "../core/tokens.js";
 import { Inject, Injectable } from "../decorators/index.js";
 
 type ConfigMap = Record<string, unknown>;

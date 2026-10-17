@@ -12,12 +12,22 @@ Part of the [smounters-packages monorepo](https://github.com/smounters/smounters
 - **WebSocket gateway** with `@WsGateway`, `@WsHandler`, message routing, lifecycle hooks
 - **Request-scoped DI** via AsyncLocalStorage (tsyringe-based)
 - **Typed config** via Zod + `ConfigService`
-- **Structured logging** via tslog + `LoggerService`
+- **Structured logging** via pluggable transports + `LoggerService`
+- **Batteries** (formerly `@smounters/kit`): request context + rate limit at the HTTP edge,
+  structured log transports, SSRF-safe fetch, decimal money, Redis service with a distributed lock,
+  protovalidate interceptor, text/ID/redaction helpers
 
 ## Install
 
 ```bash
-pnpm add @smounters/core reflect-metadata tsyringe fastify @connectrpc/connect @connectrpc/connect-fastify zod tslog
+pnpm add @smounters/core reflect-metadata tsyringe fastify @connectrpc/connect @connectrpc/connect-fastify zod
+```
+
+Optional batteries:
+
+```bash
+pnpm add ioredis                      # @smounters/core/redis
+pnpm add @bufbuild/protobuf @bufbuild/protovalidate  # @smounters/core/rpc/validate
 ```
 
 TypeScript config requires:
@@ -98,6 +108,19 @@ import { ConfigService, LoggerService } from "@smounters/core/services";
 import { ZodPipe } from "@smounters/core/pipes";
 import { appConfigSchema } from "@smounters/core/validation";
 import { registerWsGateways } from "@smounters/core/ws";
+```
+
+Batteries (formerly `@smounters/kit`):
+
+```ts
+import { clientIpNormalizeHook, requestContextHook, rateLimitHook } from "@smounters/core/http";
+import { createTransports, createLogger } from "@smounters/core/log";
+import { safeFetch, SsrfBlockedError } from "@smounters/core/net";
+import { isBalanced, quantizeToDecimals, createMoney } from "@smounters/core/money";
+import { REDIS_CONNECTION, RedisService } from "@smounters/core/redis";
+import { ProtoValidateInterceptor } from "@smounters/core/rpc/validate";
+import { renderTemplate, escapeLike } from "@smounters/core/text";
+import { ulid, redactSecrets } from "@smounters/core/util";
 ```
 
 ## Documentation

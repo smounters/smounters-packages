@@ -13,7 +13,7 @@ NestJS-inspired modular DI framework for TypeScript services. Monorepo for all `
 ## Quick Start
 
 ```bash
-pnpm add @smounters/core reflect-metadata tsyringe fastify @connectrpc/connect @connectrpc/connect-fastify zod tslog
+pnpm add @smounters/core reflect-metadata tsyringe fastify @connectrpc/connect @connectrpc/connect-fastify zod
 ```
 
 ```ts

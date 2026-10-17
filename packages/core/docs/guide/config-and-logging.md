@@ -39,7 +39,7 @@ const projectConfigSchema = appConfigSchema.extend({
 
 ## LoggerService
 
-`LoggerService` is injectable and uses `tslog` under the hood.
+`LoggerService` is injectable and delegates to the app-configured transport-based logger.
 
 ```ts
 import { LoggerService } from "@smounters/core/services";

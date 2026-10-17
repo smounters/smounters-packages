@@ -1,0 +1,435 @@
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  type DragOverEvent,
+  type DragStartEvent,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
+import { horizontalListSortingStrategy, SortableContext } from "@dnd-kit/sortable";
+import {
+  type ColumnDef,
+  type ColumnSizingState,
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  type RowSelectionState,
+  type SortingState,
+  type Updater,
+  useReactTable,
+  type VisibilityState,
+} from "@tanstack/react-table";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { useUiLabels, useUiSetting } from "../../provider";
+import { ActionButton } from "../ActionButton";
+import { ColumnsMenu } from "./ColumnsMenu";
+import { BodyCell } from "./BodyCell";
+import { DraggableHeader } from "./DraggableHeader";
+import { Paginator } from "./Paginator";
+
+/** Секция настроек, в которой лежит состояние колонок; ключ — `code` таблицы. */
+export const TABLE_COLUMNS_SECTION = "table-columns";
+
+interface ColumnState {
+  order: string[];
+  hidden: string[];
+  sorting: { id: string; desc: boolean }[];
+  /** Ширины колонок в px; отсутствующая колонка — на дефолте. */
+  sizes: Record<string, number>;
+}
+
+const EMPTY_STATE: ColumnState = { order: [], hidden: [], sorting: [], sizes: {} };
+
+export interface DataTableProps<TData> {
+  /** Стабильный код таблицы — ключ, под которым хранятся настройки колонок (например "trades.list"). */
+  code: string;
+  // biome-ignore lint/suspicious/noExplicitAny: тип значения у каждой колонки свой, таблице он безразличен
+  columns: ColumnDef<TData, any>[];
+  data: TData[];
+  getRowId?: ((row: TData) => string) | undefined;
+  /**
+   * Выделение строк: рисует ведущую колонку с галочками и сообщает наружу id выбранных строк (по
+   * `getRowId`, поэтому **без него не работает**). Выделение живёт в пределах страницы: сбрасывается
+   * на новых данных (другая страница, фильтр, перезапрос), чтобы массовое действие никогда не
+   * применилось к строкам, которых пользователь больше не видит.
+   */
+  enableSelection?: boolean | undefined;
+  onSelectionChange?: ((ids: string[]) => void) | undefined;
+  /** Увеличить число, чтобы снять выделение снаружи (например кнопкой «сбросить»). */
+  selectionResetSignal?: number | undefined;
+  isLoading?: boolean | undefined;
+  /** Запрос упал — показываем строку ошибки, а не (вводящую в заблуждение) пустоту. */
+  error?: unknown;
+  emptyText?: string | undefined;
+  title?: string | undefined;
+  toolbar?: ReactNode | undefined;
+  onRowClick?: ((row: TData) => void) | undefined;
+  onRowEdit?: ((row: TData) => void) | undefined;
+  onRowDelete?: ((row: TData) => void) | undefined;
+  editLabel?: string | undefined;
+  deleteLabel?: string | undefined;
+  /** Сортировка на сервере: таблица не сортирует строки сама, а сообщает изменение наружу. */
+  manualSorting?: boolean | undefined;
+  onServerSort?: ((sort: { id: string; desc: boolean } | null) => void) | undefined;
+  pagination?: {
+    offset: number;
+    limit: number;
+    total: number;
+    onOffsetChange: (offset: number) => void;
+    onLimitChange?: ((limit: number) => void) | undefined;
+  };
+}
+
+const resolve = <T,>(u: Updater<T>, prev: T): T => (typeof u === "function" ? (u as (p: T) => T)(prev) : u);
+
+// Сохранённый порядок + новые колонки в конце: добавленная в код колонка не должна пропадать у тех,
+// у кого порядок уже сохранён.
+function mergeOrder(saved: string[], all: string[]): string[] {
+  if (!saved.length) return all;
+  const set = new Set(saved);
+  return [...saved.filter((k) => all.includes(k)), ...all.filter((k) => !set.has(k))];
+}
+
+const TH = "px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-muted";
+const TD = "px-3 py-2 text-sm text-foreground";
+
+/**
+ * Таблица проекта: движок TanStack Table + перетаскивание колонок (dnd-kit) + меню видимости +
+ * ресайз колонок. Порядок, видимость, ширины и сортировка сохраняются per-user на сервере по `code`.
+ */
+export function DataTable<TData>({
+  code,
+  columns,
+  data,
+  getRowId,
+  enableSelection,
+  onSelectionChange,
+  selectionResetSignal,
+  isLoading,
+  error,
+  emptyText,
+  title,
+  toolbar,
+  onRowClick,
+  onRowEdit,
+  onRowDelete,
+  editLabel,
+  deleteLabel,
+  manualSorting,
+  onServerSort,
+  pagination,
+}: DataTableProps<TData>) {
+  const labels = useUiLabels();
+  const empty = emptyText ?? labels.table.empty;
+  const edit = editLabel ?? labels.actions.edit;
+  const del = deleteLabel ?? labels.actions.delete;
+  // Каждая колонка ОБЯЗАНА нести `id`: он и есть ключ, под которым хранятся порядок, видимость и
+  // ширины. Колонка без него сломала бы сохранённые настройки молча, поэтому здесь утверждение.
+  const allKeys = useMemo(() => columns.map((c) => c.id!), [columns]);
+  const { value: state, setValue: save } = useUiSetting<ColumnState>(TABLE_COLUMNS_SECTION, code, EMPTY_STATE);
+
+  const columnOrder = useMemo(() => mergeOrder(state.order ?? [], allKeys), [state.order, allKeys]);
+  const columnVisibility = useMemo<VisibilityState>(
+    () => Object.fromEntries((state.hidden ?? []).map((k) => [k, false])),
+    [state.hidden],
+  );
+  const sorting: SortingState = state.sorting ?? [];
+  const hasActions = onRowEdit !== undefined || onRowDelete !== undefined;
+
+  // Ширины держим локально, пока тянут ручку: писать настройку на каждый кадр — это запрос в секунду
+  // на пиксель. На сервер уходит результат, когда ручку отпустили.
+  const [sizing, setSizing] = useState<ColumnSizingState>(() => state.sizes ?? {});
+  const sizesKey = JSON.stringify(state.sizes ?? {});
+  // biome-ignore lint/correctness/useExhaustiveDependencies: sizesKey — стабильная проекция state.sizes
+  useEffect(() => {
+    setSizing(JSON.parse(sizesKey) as ColumnSizingState);
+  }, [sizesKey]);
+
+  // Выделение — состояние страницы, а не пользователя: в настройки не пишется.
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
+  const table = useReactTable<TData>({
+    data,
+    columns,
+    ...(getRowId ? { getRowId } : {}),
+    state: { columnOrder, columnVisibility, sorting, columnSizing: sizing, rowSelection },
+    enableRowSelection: !!enableSelection,
+    onRowSelectionChange: setRowSelection,
+    columnResizeMode: "onChange",
+    enableColumnResizing: true,
+    onColumnOrderChange: (u) => save({ ...state, order: resolve(u, columnOrder) }),
+    onColumnVisibilityChange: (u) => {
+      const v = resolve(u, columnVisibility);
+      save({ ...state, order: columnOrder, hidden: allKeys.filter((k) => v[k] === false) });
+    },
+    onSortingChange: (u) => save({ ...state, order: columnOrder, sorting: resolve(u, sorting) }),
+    onColumnSizingChange: (u) => setSizing((prev) => resolve(u, prev)),
+    onColumnSizingInfoChange: (u) => {
+      const info = resolve(u, table.getState().columnSizingInfo);
+      // Ручку отпустили → фиксируем ширины в настройках.
+      if (!info.isResizingColumn && table.getState().columnSizingInfo.isResizingColumn) {
+        save({ ...state, order: columnOrder, sizes: sizing });
+      }
+      table.setState((s) => ({ ...s, columnSizingInfo: info }));
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    manualSorting: manualSorting ?? false,
+    enableSortingRemoval: true,
+    sortDescFirst: false,
+  });
+
+  // Новые данные (страница/фильтр/перезапрос) или сигнал снаружи → выделение снимается: массовое
+  // действие не должно применяться к строкам, которых на экране уже нет.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: data и selectionResetSignal — триггеры сброса, в теле не читаются
+  useEffect(() => {
+    if (enableSelection) setRowSelection({});
+  }, [data, enableSelection, selectionResetSignal]);
+
+  // Сообщаем наружу id выбранных строк. onSelectionChange читаем через ref, чтобы зависеть только от
+  // самого выделения: незамемоизированная функция родителя иначе даёт цикл (новый массив id →
+  // setState у родителя → новая функция → эффект снова).
+  const onSelectionChangeRef = useRef(onSelectionChange);
+  onSelectionChangeRef.current = onSelectionChange;
+  const selectedKey = Object.keys(rowSelection)
+    .filter((k) => rowSelection[k])
+    .join(",");
+  useEffect(() => {
+    if (enableSelection) onSelectionChangeRef.current?.(selectedKey ? selectedKey.split(",") : []);
+  }, [enableSelection, selectedKey]);
+
+  // Сброс ширины (двойной клик по ручке): убираем колонку из сохранённых ширин, иначе перезагрузка
+  // вернёт прежнее значение — состояние таблицы и настройка пользователя это разные вещи.
+  const resetWidth = (columnId: string) => {
+    const next = { ...(state.sizes ?? {}) };
+    delete next[columnId];
+    save({ ...state, order: columnOrder, sizes: next });
+  };
+
+  // Серверная сортировка: сообщаем текущую наружу — на монтировании (когда подтянулась сохранённая) и
+  // на каждой смене.
+  const sortKey = sorting[0] ? `${sorting[0].id}:${sorting[0].desc ? "desc" : "asc"}` : "";
+  // biome-ignore lint/correctness/useExhaustiveDependencies: sortKey — стабильная проекция sorting[0]
+  useEffect(() => {
+    if (!manualSorting) return;
+    const s = sorting[0];
+    onServerSort?.(s ? { id: s.id, desc: !!s.desc } : null);
+  }, [manualSorting, onServerSort, sortKey]);
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
+    useSensor(KeyboardSensor),
+  );
+
+  /*
+   * Куда встанет колонка — видно ЗАРАНЕЕ.
+   *
+   * Тело таблицы за колонкой не едет (ячейки намеренно не являются узлами dnd-kit), и без указателя
+   * перетаскивание читалось как «я что-то тащу, но куда — непонятно»: призрак заголовка с
+   * прозрачностью и больше ничего. Показываем границу, у которой колонка приземлится, и подсвечиваем
+   * ту, рядом с которой это произойдёт.
+   */
+  const [drag, setDrag] = useState<{ active: string; over: string } | null>(null);
+
+  const dropEdge = (columnId: string): "left" | "right" | undefined => {
+    if (drag?.over !== columnId || drag.active === columnId) return undefined;
+    const from = columnOrder.indexOf(drag.active);
+    const to = columnOrder.indexOf(drag.over);
+    if (from < 0 || to < 0) return undefined;
+    // Тащим вправо — колонка встанет ЗА цель, влево — перед ней.
+    return to > from ? "right" : "left";
+  };
+
+  const onDragStart = ({ active }: DragStartEvent) => setDrag({ active: String(active.id), over: String(active.id) });
+  const onDragOver = ({ active, over }: DragOverEvent) => {
+    if (over) setDrag({ active: String(active.id), over: String(over.id) });
+  };
+
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    setDrag(null);
+    if (!over || active.id === over.id) return;
+    const from = columnOrder.indexOf(active.id as string);
+    const to = columnOrder.indexOf(over.id as string);
+    if (from < 0 || to < 0) return;
+    const next = [...columnOrder];
+    const [moved] = next.splice(from, 1);
+    if (moved === undefined) return;
+    next.splice(to, 0, moved);
+    save({ ...state, order: next });
+  };
+
+  const colCount = table.getVisibleLeafColumns().length + (hasActions ? 1 : 0) + (enableSelection ? 1 : 0);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-3">
+        {title && <h2 className="text-lg font-semibold text-foreground">{title}</h2>}
+        <div className="ml-auto flex items-center gap-2">
+          {toolbar}
+          <ColumnsMenu table={table} onReset={() => save(EMPTY_STATE)} />
+        </div>
+      </div>
+
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        modifiers={[restrictToHorizontalAxis]}
+        onDragStart={onDragStart}
+        onDragOver={onDragOver}
+        onDragEnd={onDragEnd}
+        onDragCancel={() => setDrag(null)}
+      >
+        <div className="overflow-x-auto rounded-large border border-border bg-surface">
+          {/* Полоса под шапкой (см. styles.css) — единственный признак фоновой работы: пока строки уже
+              показаны, подменять их текстом нельзя (таблица прыгает, пользователь теряет место). На
+              самой первой загрузке (строк ещё нет) тело просто пустое — полоса под шапкой и есть сигнал,
+              никакого текста «Загрузка…» в компоненте нет вообще. */}
+          <table className="w-full border-collapse" data-table-busy={isLoading ? "" : undefined}>
+            {/*
+              Подсветка колонки-цели во ВСЮ высоту таблицы, а не только в шапке.
+              Красится `col`, а не каждая ячейка: фон колонки браузер рисует позади ячеек, поэтому
+              ни ячейкам, ни телу знать о перетаскивании не нужно — им незачем перерисовываться, и
+              они остаются вне dnd-kit. Подсветка одной шапки терялась: полоска в тридцать пикселей
+              над списком в двенадцать строк не читается как «сюда встанет».
+            */}
+            {drag && (
+              <colgroup>
+                {enableSelection && <col />}
+                {columnOrder
+                  .filter((id) => table.getColumn(id)?.getIsVisible())
+                  .map((id) => (
+                    <col key={id} className={drag.over === id ? "bg-accent/15" : undefined} />
+                  ))}
+                {hasActions && <col />}
+              </colgroup>
+            )}
+            <thead>
+              <tr className="border-border border-b">
+                {/* Колонка выделения — вне SortableContext: её не перетаскивают и не прячут. */}
+                {enableSelection && (
+                  <th className={`${TH} w-10`}>
+                    <input
+                      type="checkbox"
+                      className="size-4 cursor-pointer accent-accent align-middle"
+                      aria-label={labels.table.selectAll}
+                      checked={table.getIsAllPageRowsSelected()}
+                      ref={(el) => {
+                        if (el) el.indeterminate = table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected();
+                      }}
+                      onChange={table.getToggleAllPageRowsSelectedHandler()}
+                    />
+                  </th>
+                )}
+                <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
+                  {table.getHeaderGroups()[0]?.headers.map((h) => (
+                    // Ширину отдаём ТОЛЬКО у потянутых колонок: остальные раскладывает браузер.
+                    <DraggableHeader
+                      key={h.id}
+                      header={h}
+                      onResetWidth={resetWidth}
+                      {...(dropEdge(h.column.id) ? { dropEdge: dropEdge(h.column.id) } : {})}
+                      {...(sizing[h.column.id] ? { width: sizing[h.column.id] } : {})}
+                    />
+                  ))}
+                </SortableContext>
+                {hasActions && <th className={TH} />}
+              </tr>
+            </thead>
+            <tbody>
+              {error ? (
+                <tr>
+                  <td className={`${TD} text-danger`} colSpan={colCount}>
+                    {labels.table.loadError(
+                      error instanceof Error ? error.message : labels.table.loadErrorFallback,
+                    )}
+                  </td>
+                </tr>
+              ) : data.length === 0 ? (
+                // Идёт первая загрузка — пусто, полоса под шапкой уже говорит «идёт работа»; текст
+                // «пусто» ставим ТОЛЬКО когда загрузка закончилась и строк подтверждённо нет.
+                isLoading ? null : (
+                  <tr>
+                    <td className={`${TD} text-muted`} colSpan={colCount}>
+                      {empty}
+                    </td>
+                  </tr>
+                )
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className={`border-border border-b last:border-0 hover:bg-surface-secondary ${onRowClick ? "cursor-pointer" : ""} ${row.getIsSelected() ? "bg-surface-secondary" : ""}`}
+                    onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+                    role={onRowClick ? "button" : undefined}
+                    tabIndex={onRowClick ? 0 : undefined}
+                    onKeyDown={
+                      onRowClick
+                        ? (e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              onRowClick(row.original);
+                            }
+                          }
+                        : undefined
+                    }
+                  >
+                    {enableSelection && (
+                      // biome-ignore lint/a11y/useKeyWithClickEvents: гасит всплытие клика по строке, сама галочка — настоящий контрол
+                      <td className={`${TD} w-10`} onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          className="size-4 cursor-pointer accent-accent align-middle"
+                          aria-label={labels.table.selectRow}
+                          checked={row.getIsSelected()}
+                          disabled={!row.getCanSelect()}
+                          onChange={row.getToggleSelectedHandler()}
+                        />
+                      </td>
+                    )}
+                    {row.getVisibleCells().map((cell) => (
+                      <BodyCell key={cell.id} {...(sizing[cell.column.id] ? { width: sizing[cell.column.id] } : {})}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </BodyCell>
+                    ))}
+                    {hasActions && (
+                      // biome-ignore lint/a11y/useKeyWithClickEvents: гасит всплытие клика по строке, сами действия — кнопки
+                      <td className={`${TD} whitespace-nowrap text-right`} onClick={(e) => e.stopPropagation()}>
+                        {onRowEdit && (
+                          <ActionButton icon="edit" onPress={() => onRowEdit(row.original)} aria-label={edit} />
+                        )}
+                        {onRowDelete && (
+                          <ActionButton
+                            icon="delete"
+                            tone="danger-ghost"
+                            onPress={() => onRowDelete(row.original)}
+                            aria-label={del}
+                          />
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </DndContext>
+
+      {pagination && (
+        <Paginator
+          offset={pagination.offset}
+          limit={pagination.limit}
+          total={pagination.total}
+          onOffsetChange={pagination.onOffsetChange}
+          {...(pagination.onLimitChange ? { onLimitChange: pagination.onLimitChange } : {})}
+        />
+      )}
+    </div>
+  );
+}

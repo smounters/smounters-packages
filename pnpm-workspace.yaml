@@ -1,8 +1,6 @@
 packages:
   - "packages/*"
 
-# esbuild нужен vitest/vitepress; @swc/core — трансформер тестов, эмитит
-# emitDecoratorMetadata (esbuild этого не умеет, без него DI в тестах падает).
+# esbuild нужен vitepress (транспиляция при сборке доков).
 allowBuilds:
   esbuild: true
-  "@swc/core": true

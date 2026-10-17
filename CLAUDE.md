@@ -16,15 +16,15 @@ pnpm workspaces monorepo для пакетов `@smounters/*`, публикуе�
 
 ```
 packages/
-├── core/     — @smounters/core   (ядро фреймворка Imperium)
+├── core/     — @smounters/core   (ядро фреймворка Imperium + батарейки: журнал, Redis+лок, SSRF, деньги, контекст запроса)
 ├── cron/     — @smounters/cron   (планировщик, декоратор @Cron)
 ├── events/   — @smounters/events (типизированный event-emitter, @OnEvent)
 ├── ui/       — @smounters/ui     (дизайн-слой на HeroUI v3: каркас, таблица, формы, темы)
-├── kit/      — @smounters/kit    (батарейки: журнал, Redis+лок, SSRF, деньги, контекст запроса, env)
 └── data/     — @smounters/data   (фрагменты модели данных MikroORM: UUIDv7, аудит, настройки)
 ```
 
-Правило `kit`: **механизм здесь, политика в приложении.** Видно в подписях — лимитер частоты получает
+Правило батареек (бывший `kit`, слиты в `core` 2026-10-16): **механизм здесь, политика в приложении.**
+Видно в подписях — лимитер частоты получает
 `bucketFor(req)`, `RedisService` получает строку подключения значением-провайдером, журнал — имя сервиса.
 Словарь заголовков продукта, план счетов и матрицы прав сюда не попадают.
 
@@ -45,6 +45,7 @@ packages/
 | `@smounters/imperium-events` | `@smounters/events` | 2.0.0, 2026-06-11 |
 | репо `smounters/imperium` | репо `smounters/smounters-public` | 2026-07-20 |
 | репо `smounters/smounters-public` | репо `smounters/smounters-packages` | 2026-07-29 |
+| `@smounters/kit` | `@smounters/core` (подпути `log`, `http`, `net`, `util`, `text`, `money`, `redis`, `rpc/validate`) | 2.1.0, 2026-10-16 |
 
 Старые пакеты `@smounters/imperium*` остаются на npm и подлежат деприкейту.
 
@@ -59,7 +60,6 @@ packages/
 pnpm install             # установка
 pnpm run typecheck       # типизация всех пакетов (core собирается первым)
 pnpm run lint            # линт
-pnpm run test            # тесты (core собирается первым)
 pnpm run build           # сборка
 pnpm run docs:dev        # VitePress dev-сервер (доки core)
 pnpm run docs:build      # сборка доков
@@ -73,26 +73,20 @@ pnpm run docs:build      # сборка доков
 git tag v2.0.1 && git push origin v2.0.1
 ```
 
-CI (`.github/workflows/publish.yml`): резолв версии из тега → **typecheck + тесты** →
+CI (`.github/workflows/publish.yml`): резолв версии из тега → **typecheck** →
 сборка → `pnpm publish --access public` по матрице пакетов → доки на GitHub Pages →
 GitHub Release. Нужен секрет `NPM_TOKEN` на репозитории.
 
-> Гейт с тестами добавлен намеренно. Раньше workflow собирал и публиковал, но ничего не
+> Гейт с typecheck добавлен намеренно. Раньше workflow собирал и публиковал, но ничего не
 > проверял — именно поэтому расхождение кода с npm никто не заметил. Публикация необратима:
 > npm не даёт перезалить существующую версию.
 
-## Тесты и декораторы — важная грабля
+## Тесты
 
-Тесты гоняются через **SWC** (`unplugin-swc` в `vitest.config.ts` каждого пакета), а не через
-esbuild по умолчанию. Причина: esbuild **не эмитит `emitDecoratorMetadata`**, без него
-`design:paramtypes` пустой, и tsyringe падает с «TypeInfo not known for X» на любом
-конструкторном DI. Проходят только тесты, не использующие DI, — что и маскировало поломку.
-
-Не убирать плагин SWC из vitest-конфигов. На сборку пакетов (`tsc`) это не влияет.
-
-По той же причине в коде пакетов **нельзя** заменять рантайм-импорты DI-токенов на
-`import type` — значение стирается и контейнер падает на старте. См. комментарий в
-`packages/cron/src/cron.module.ts`.
+Тесты в репозитории сознательно отсутствуют: vitest и все тестовые файлы удалены,
+возвращать их не планируется — покрытие держится за счёт `typecheck` в CI.
+Рантайм-импорты DI-токенов нельзя заменять на `import type` — значение стирается
+и контейнер падает на старте. См. комментарий в `packages/cron/src/cron.module.ts`.
 
 ## Кросс-пакетная разработка
 
@@ -103,7 +97,7 @@ esbuild по умолчанию. Причина: esbuild **не эмитит `em
 
 - Сообщения коммитов — короткие, **без упоминаний AI**
 - Все относительные импорты — с расширением `.js` (совместимость с Node ESM)
-- Перед пушем: `pnpm run typecheck && pnpm run test`
+- Перед пушем: `pnpm run typecheck`
 - **Перед публикацией:** изменения отражены в доках (VitePress + README), CHANGELOG обновлён,
   `docs:build` проходит
 - Документация — для пользователей. Внутренние инструкции по CI и публикации — только здесь,

@@ -1,6 +1,6 @@
 # Logger Transports
 
-Imperium supports pluggable logger transports. Instead of being locked into tslog, you can provide custom transports for file logging, Sentry, OTLP, or any other destination.
+Imperium supports pluggable logger transports: you provide custom transports for file logging, Sentry, OTLP, or any other destination.
 
 ## Built-in Console Transport
 
@@ -70,22 +70,23 @@ const app = new Application(AppModule, {
 
 Each transport can apply its own filtering in the `log()` method.
 
-## Backwards Compatibility
+## Ready-made Structured Transports
 
-The old tslog-based configuration still works:
+For production-shaped output (single-line JSON outside local, coloured human line locally, with the
+request id mixed into every line) use the batteries in `@smounters/core/log`:
 
 ```ts
-// This continues to work — tslog options detected automatically
+import { createTransports } from "@smounters/core/log";
+
 const app = new Application(AppModule, {
   loggerOptions: {
-    name: "app",
-    type: "pretty",
-    minLevel: 3,
+    transports: createTransports({ env: "local", service: "api" }),
   },
 });
 ```
 
-If the options object contains a `transports` array, the native `ImperiumLogger` is used. Otherwise, tslog is used.
+Register `requestContextHook` from `@smounters/core/http` and every line automatically carries
+`reqId`/`src` — calling code never passes them.
 
 ## Global Error Reporting
 

@@ -2,6 +2,35 @@
 
 All notable changes to `@smounters/core` are documented in this file.
 
+## Unreleased
+
+### Added
+- **Batteries из `@smounters/kit`** — весь набор перенесён в core под отдельными подпутями
+  (пакет `@smounters/kit` удалён из репозитория):
+  - `@smounters/core/http` — edge-хелперы: реальный IP клиента, сквозной id запроса, точные байты
+    тела, лимит частоты (`clientIp`, `clientIpNormalizeHook`, `requestContextHook`, `rateLimitHook`,
+    `bufferCapped`, `stashRawBodyStream`).
+  - `@smounters/core/log` — транспорты структурного журнала (`createTransports`, автономный
+    `createLogger`); `reqId`/`src` подмешиваются в каждую строку при зарегистрированном
+    `requestContextHook`.
+  - `@smounters/core/net` — SSRF-защита (`isPrivateIp`, `assertPublicUrl`, `safeFetch`,
+    `SsrfBlockedError`).
+  - `@smounters/core/money` — decimal-арифметика на строках (`toMoneyAmount`, `quantizeToDecimals`,
+    `isBalanced`, `createMoney`); новая зависимость `decimal.js`.
+  - `@smounters/core/redis` — `RedisService` + токен `REDIS_CONNECTION` (необязательный peer `ioredis`).
+  - `@smounters/core/rpc/validate` — `ProtoValidateInterceptor`
+    (необязательные peer `@bufbuild/protobuf`, `@bufbuild/protovalidate`).
+  - `@smounters/core/text` — экранирование, шаблоны `{{ }}`, разбор ФИО.
+  - `@smounters/core/util` — `ulid`, `redactSecrets`.
+- `enumSchema` в `@smounters/core/validation` (бывший `kit/config`).
+
+### Changed
+- `REDIS_CONNECTION` теперь `Symbol.for("redis:connection")` (раньше — локальный `Symbol` в `@smounters/kit`).
+- Peer-зависимость `tslog` удалена: логгер полностью перешёл на транспорты.
+
+### Fixed
+- `services`: импорты `CONFIG_TOKEN`/`LOGGER_TOKEN` указывали на удалённый `core/config.ts`.
+
 ## 2.0.1 - 2026-07-20
 
 ### Fixed

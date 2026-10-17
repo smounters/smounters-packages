@@ -47,6 +47,9 @@ Root import is intentionally disabled. Use subpaths:
 - `@smounters/core/pipes`
 - `@smounters/core/validation`
 - `@smounters/core/ws`
+- Batteries (formerly `@smounters/kit`): `@smounters/core/http`, `@smounters/core/log`,
+  `@smounters/core/net`, `@smounters/core/money`, `@smounters/core/redis`,
+  `@smounters/core/rpc/validate`, `@smounters/core/text`, `@smounters/core/util`
 
 Validation subpath also exports the built-in app config schema:
 

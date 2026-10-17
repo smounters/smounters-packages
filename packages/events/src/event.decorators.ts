@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { EVENTS_HANDLERS_TOKEN } from "./event.tokens";
+import { EVENTS_HANDLERS_TOKEN } from "./event.tokens.js";
 
 export interface EventHandlerMeta {
   pattern: string;

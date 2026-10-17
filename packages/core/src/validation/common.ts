@@ -67,3 +67,9 @@ export const stringArraySchema = <T extends z.ZodType>(itemSchema: T) =>
 
 export const enumArraySchema = <T extends NativeEnumLike>(enumType: T, normalize?: (value: string) => string) =>
   stringArraySchema(nativeEnumSchema(enumType, normalize));
+
+/** String enum with optional normalization (e.g. lower-casing `ENVIRONMENT` before matching). */
+export const enumSchema = <const T extends readonly [string, ...string[]]>(
+  values: T,
+  normalize?: (value: string) => string,
+) => z.preprocess((value) => (typeof value === "string" && normalize ? normalize(value) : value), z.enum(values));

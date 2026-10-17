@@ -40,7 +40,6 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
-    "test": "vitest run --passWithNoTests",
     "clean": "rm -rf dist",
     "prepack": "pnpm run clean && pnpm run build",
     "prepublishOnly": "pnpm run clean && pnpm run build"

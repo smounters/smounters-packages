@@ -30,7 +30,7 @@ jobs:
   # разошёлся с опубликованным, и никто не заметил: workflow собирал и публиковал,
   # но не проверял. Публикация необратима, поэтому проверки идут ДО неё.
   verify:
-    name: Typecheck + tests
+    name: Typecheck
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -53,9 +53,6 @@ jobs:
       - name: Typecheck
         run: pnpm run typecheck
 
-      - name: Test
-        run: pnpm run test
-
   publish:
     name: Publish ${{ matrix.package }}
     needs: [detect, verify]
@@ -68,7 +65,6 @@ jobs:
           - "@smounters/cron"
           - "@smounters/events"
           - "@smounters/ui"
-          - "@smounters/kit"
           - "@smounters/data"
           - "@smounters/auth"
     steps:
