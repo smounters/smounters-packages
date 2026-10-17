@@ -40,7 +40,7 @@ async signIn(
 
 ## Server Streaming
 
-Imperium supports server streaming RPC via `async function*`. ConnectRPC delivers this as SSE (Server-Sent Events) in browsers — no WebSocket needed.
+Core supports server streaming RPC via `async function*`. ConnectRPC delivers this as SSE (Server-Sent Events) in browsers — no WebSocket needed.
 
 ```ts
 import { RpcAbortSignal, RpcData, RpcMethod, RpcService } from "@smounters/core/decorators";
@@ -72,7 +72,7 @@ Only `unary` and `server_streaming` are supported. Client streaming and bidirect
 
 ## Unified Server
 
-No separate RPC server is needed. Imperium auto-detects registered HTTP/RPC handlers and serves both on one Fastify instance.
+No separate RPC server is needed. Core auto-detects registered HTTP/RPC handlers and serves both on one Fastify instance.
 
 ```ts
 await app.start({

@@ -1,6 +1,6 @@
 # WebSocket Gateway
 
-Imperium supports real-time WebSocket communication via `@fastify/websocket`. No socket.io — just native WebSocket with message routing.
+Core supports real-time WebSocket communication via `@fastify/websocket`. No socket.io — just native WebSocket with message routing.
 
 ## Installation
 
@@ -65,7 +65,7 @@ Gateways are registered as regular providers:
 class AppModule {}
 ```
 
-Imperium auto-detects providers with `@WsGateway()` metadata and registers them on the specified path.
+Core auto-detects providers with `@WsGateway()` metadata and registers them on the specified path.
 
 ## Message Protocol
 

@@ -3,7 +3,7 @@ import { consoleTransport, levelIndex } from "./log-transport.js";
 
 /**
  * Native logger with pluggable transports.
- * Drop-in replacement for tslog Logger — same method signatures.
+ * Method signatures follow the familiar tslog-style API (silly..fatal).
  */
 export class Logger {
   private readonly transports: LogTransport[];

@@ -1,4 +1,4 @@
-# Imperium
+# Core
 
 NestJS-inspired modular DI framework for TypeScript services. Monorepo for all `@smounters/core` packages.
 
@@ -23,7 +23,7 @@ import { HttpController, Get, Injectable, Module } from "@smounters/core/decorat
 
 @Injectable()
 class HelloService {
-  greet() { return { message: "Hello from Imperium" }; }
+  greet() { return { message: "Hello from Core" }; }
 }
 
 @HttpController("/api")

@@ -1,6 +1,6 @@
 # Logger Transports
 
-Imperium supports pluggable logger transports: you provide custom transports for file logging, Sentry, OTLP, or any other destination.
+Core supports pluggable logger transports: you provide custom transports for file logging, Sentry, OTLP, or any other destination.
 
 ## Built-in Console Transport
 

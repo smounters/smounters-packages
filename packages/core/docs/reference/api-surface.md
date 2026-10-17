@@ -1,6 +1,6 @@
 # API Surface
 
-Imperium exports only subpaths. Root import (`@smounters/core`) is intentionally disabled.
+Core exports only subpaths. Root import (`@smounters/core`) is intentionally disabled.
 
 ## `@smounters/core/core`
 

@@ -7,7 +7,7 @@
 - `host?: string`
 - `port?: number`
 
-If `port` is omitted, Imperium tries `APP_PORT` from current app config (by default it starts with `process.env`).
+If `port` is omitted, Core tries `APP_PORT` from current app config (by default it starts with `process.env`).
 
 ## Path Prefixes
 

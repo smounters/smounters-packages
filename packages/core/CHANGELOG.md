@@ -50,12 +50,12 @@ All notable changes to `@smounters/core` are documented in this file.
 ## 1.2.0 - 2026-03-30
 
 ### Added
-- **Pluggable logger transports** — `LogTransport` interface, `ImperiumLogger` class, `consoleTransport()` factory.
+- **Pluggable logger transports** — `LogTransport` interface, `CoreLogger` class, `consoleTransport()` factory.
 - **Global `onError` callback** — single error reporting point for HTTP, RPC, WebSocket, cron, and event handler errors. Integrates with Sentry, OTLP, or any custom reporter.
-- New types: `LogLevel`, `LogEntry`, `LogTransport`, `ImperiumLoggerOptions`, `ErrorContext`, `ErrorContextType`, `OnErrorCallback`.
+- New types: `LogLevel`, `LogEntry`, `LogTransport`, `CoreLoggerOptions`, `ErrorContext`, `ErrorContextType`, `OnErrorCallback`.
 
 ### Changed
-- `LoggerOptions` is now a union of `ImperiumLoggerOptions` (transport-based) and `TslogOptions` (legacy tslog). Auto-detected from options shape.
+- `LoggerOptions` is now a union of `CoreLoggerOptions` (transport-based) and `TslogOptions` (legacy tslog). Auto-detected from options shape.
 - All adapters (HTTP, RPC, WS) now call `reportError()` when `onError` is configured.
 - `imperium-cron` and `imperium-events` now use `LoggerService` and `onError` instead of raw `console.error`.
 

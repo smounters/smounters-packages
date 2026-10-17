@@ -1,8 +1,8 @@
-# Imperium
+# Core
 
 > Inspired by NestJS, built on top of `tsyringe`, `Fastify`, and `ConnectRPC`.
 
-Imperium is a modular DI framework for TypeScript services that need:
+Core is a modular DI framework for TypeScript services that need:
 
 - a single server for HTTP, RPC, and WebSocket;
 - module boundaries with explicit exports/imports;

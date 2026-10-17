@@ -3,13 +3,13 @@ import { defineConfig } from "vitepress";
 const base = process.env.DOCS_BASE?.trim() || "/";
 
 export default defineConfig({
-  title: "Imperium",
+  title: "Core",
   description: "NestJS-inspired DI container with unified HTTP + Connect RPC + WebSocket server.",
   base,
   lastUpdated: true,
   cleanUrls: true,
   themeConfig: {
-    siteTitle: "Imperium",
+    siteTitle: "Core",
     nav: [
       { text: "Guide", link: "/guide/getting-started" },
       { text: "Reference", link: "/reference/api-surface" },
