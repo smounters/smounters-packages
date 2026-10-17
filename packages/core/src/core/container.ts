@@ -675,7 +675,7 @@ export class AppContainer {
     );
   }
 
-  setLogger(logger: AppLogger): void {
+  setLogger(logger: Logger): void {
     this.assertRuntimeConfigMutable("logger");
     this.root.registerInstance(LOGGER_TOKEN, logger);
   }

@@ -1,10 +1,12 @@
-import type { LoggerOptions, LogLevel, LogTransport } from "../types.js";
+import type {
+  AppLogger,
+  LogEntry,
+  LoggerOptions,
+  LogLevel,
+  LogTransport,
+} from "../types.js";
 import { consoleTransport, levelIndex } from "./log-transport.js";
 
-/**
- * Native logger with pluggable transports.
- * Method signatures follow the familiar tslog-style API (silly..fatal).
- */
 export class Logger {
   private readonly transports: LogTransport[];
   private readonly minIdx: number;
@@ -23,7 +25,7 @@ export class Logger {
     const message = args.length > 0 && typeof args[0] === "string" ? args[0] : "";
     const rest = typeof args[0] === "string" ? args.slice(1) : args;
 
-    const entry = {
+    const entry: LogEntry = {
       level,
       message,
       args: rest,
@@ -78,4 +80,45 @@ export type AppLogger = Logger;
 
 export function createLogger(options?: LoggerOptions): AppLogger {
   return new Logger(options);
+}
+
+export function createTransports(options: LoggerOptions = {}): LogTransport[] {
+  const minIdx = levelIndex(options.minLevel ?? "silly");
+  return [
+    {
+      log(entry: LogEntry): void {
+        if (levelIndex(entry.level) < minIdx) return;
+        consoleTransport({ minLevel: options.minLevel })!.log(entry);
+      },
+    },
+  ];
+}
+
+export interface StandaloneLogger {
+  info: (...args: unknown[]) => void;
+  warn: (...args: unknown[]) => void;
+  error: (...args: unknown[]) => void;
+  debug: (...args: unknown[]) => void;
+}
+
+export function createStandaloneLogger(options: LoggerOptions = {}): StandaloneLogger {
+  const minIdx = levelIndex(options.minLevel ?? "info");
+  return {
+    info: (...args) => {
+      if (levelIndex("info") < minIdx) return;
+      console.log(...args);
+    },
+    warn: (...args) => {
+      if (levelIndex("warn") < minIdx) return;
+      console.warn(...args);
+    },
+    error: (...args) => {
+      if (levelIndex("error") < minIdx) return;
+      console.error(...args);
+    },
+    debug: (...args) => {
+      if (levelIndex("debug") < minIdx) return;
+      console.log(...args);
+    },
+  };
 }
